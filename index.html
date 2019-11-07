@@ -1,8 +1,9 @@
+<head>
+<meta charset="utf-8" />
 <script type="text/javascript">
 	var noteRepeats = 3 //the number of duplicate note audio stored
 	var appendToDocument = false //whether or not note audio is appended to the soundplayers div
-	var keyCode_Sequential_Mapping = [81, 50, 87, 51, 69, 82, 53, 84, 54, 89, 55, 85, 73, 57, 79, 48, 80, 219, 187, 221]
-	var sustain = true
+	var keyCodeMapping = [81, 50, 87, 51, 69, 82, 53, 84, 54, 89, 55, 85, 73, 57, 79, 48, 80, 219, 187, 221]
 
 	function log(x) {
 		var element = document.createElement("pre")
@@ -130,47 +131,71 @@
 	{
 		var i = 0;
 		var j = 0;
-			var attack = 0.3
-			var dampen = 1+(frequency * 0.01);
+		var attack = 0.3
+		var dampen = 1+(frequency * 0.01);
 
-			var attackLen_int = (sampleRate * attack) | 0;
-			var attackLen = (sampleRate*attack)
-			var decayLen = (sampleRate*(time-attack))
-			while(i < attackLen_int) {
-				val = volume * (i/attackLen) * organ_wave();
+		var attackLen_int = (sampleRate * attack) | 0;
+		var attackLen = (sampleRate*attack)
+		var decayLen = (sampleRate*(time-attack))
+		while(i < attackLen_int) {
+			val = volume * (i/attackLen) * organ_wave(i, sampleRate, frequency);
 
-				data[j++] = val;
-				data[j++] = val >> 8;
-				++i;
-			}
+			data[j++] = val;
+			data[j++] = val >> 8;
+			++i;
+		}
 
-			while (i < decayEnd) {
-				val = volume * Math.pow((1-((i-attackLen)/decayLen)),dampen) * organ_wave();
+		while (i < decayEnd) {
+			val = volume * Math.pow((1-((i-attackLen)/decayLen)),dampen) * organ_wave(i, sampleRate, frequency);
 
-				data[j++] = val;
-				data[j++] = val >> 8;
-				++i;
-			}
+			data[j++] = val;
+			data[j++] = val >> 8;
+			++i;
+		}
 	}
-	function acoustic_16(data, period, samples, volume)
+	function acoustic_rand_16(data, period, samples, volume)
 	{
 		var i = 0;
 		var j = 0;
+		var p = 0;
 		//var data = new Uint8Array(samples * 2); //16 bit integer
-		var valueTable = new Array(period)
-		for(i = 0; i < period; i++) {
+		var period_int = Math.ceil(period)
+		var valueTable = new Array(period_int)
+		for(i = 0; i < period_int; i++) {
 			var value = volume * (valueTable[i] = (Math.random() > 0.5) ? 1 : -1)
 			data[j++] = value
 			data[j++] = value >> 8
 		}
 		for(; i < samples; i++) {
-			var point = i % period
+			var point = Math.floor(i % period)
 			var next = point + 1;
-			if (next == period) {next = 0}
+			if (next == period_int) {next = 0}
 			var value = volume * (valueTable[point] = (valueTable[point] + valueTable[next]) / 2)
 			data[j++] = value
 			data[j++] = value >> 8
 		}
+		/*
+		var periods = samples/period - 1
+		for(p = 0; p < periods; p++) {
+			for(i = 0; i < period_int; i++) {
+				var next = i + 1;
+				if (next == period_int) {next = 0}
+				var value = volume * (valueTable[i] = (valueTable[i] + valueTable[next]) / 2)
+				data[j++] = value
+				data[j++] = value >> 8
+			}
+		}
+		*/
+		/*
+		for(; i < samples; i++) {
+			var point = i % period_int
+			var next = point + 1;
+			if (next == period_int) {next = 0}
+			var value = volume * (valueTable[point] = (valueTable[point] + valueTable[next]) / 2)
+			data[j++] = value
+			data[j++] = value >> 8
+		}
+		*/
 		//return data;
 	}
 	function edm_16(data, sampleRate, frequency, volume, time, decayEnd)
@@ -184,16 +209,16 @@
 		var decayLen = (sampleRate*(time-attack))
 		var wave = function() {
 			var base = modulations[0];
-			var mod = modulations.slice(0);
-			return mod[0](
+			//var mod = modulations.slice(0);
+			return modulations[0](
 				i,
 				sampleRate,
 				frequency,
-				mod[9](
+				modulations[9](
 					i,
 					sampleRate,
 					frequency,
-					mod[2](
+					modulations[2](
 						i,
 						sampleRate,
 						frequency,
@@ -202,7 +227,7 @@
 							Math.pow(base(i, sampleRate, frequency, 1), 7)
 					)
 				) +
-					mod[8](
+					modulations[6](
 						i,
 						sampleRate,
 						frequency,
@@ -241,8 +266,8 @@
 			organ_16(data, sampleRate, frequency, volume, time, decayEnd)
 			break;
 			case 2: //acoustic
-			var period = Math.floor(sampleRate/frequency)
-			acoustic_16(data, period, decayEnd, volume)
+			var period = sampleRate/frequency
+			acoustic_rand_16(data, period, decayEnd, volume)
 			break;
 			case 3: //edm
 			edm_16(data, sampleRate, frequency, volume, time, decayEnd)
@@ -287,60 +312,154 @@
 		//soundplayer.load();
 		return soundplayer;
 	}
-	var soundplayersstorages = [[], [], [], []]
-	var keyDown = function(event) {
-		var soundchoice = parseInt(document.form.soundchoice.value);
-		var soundplayersstorage = soundplayersstorages[soundchoice]
-		var keyId = keyCode_Sequential_Mapping.indexOf(event.keyCode)
-		if (keyId != -1) {
-			var midinote = 70 + keyId
-			var frequency = 440 * Math.pow(2, ( (midinote - 69) / 12) )
-			var soundplayer;
-			var soundplayers;
-			if (!(midinote < soundplayersstorage.length)) soundplayersstorage[midinote] = []
-			if (!soundplayersstorage[midinote]) soundplayersstorage[midinote] = []
-			soundplayers = soundplayersstorage[midinote]
-			var maxTime = -1;
-			var maxTime_soundplayer;
-			for (var i = 0; i < soundplayers.length; i++)
-			{
-				soundplayer = soundplayersstorage[midinote][i]
-				if (soundplayer.currentTime > maxTime) {
-					maxTime_soundplayer = soundplayer;
-					maxTime = soundplayer.currentTime;
-					if (soundplayer.currentTime == soundplayer.duration) break;
+	function displayNoteState(midinote, numSoundPlayersPlaying) {
+		var keys = document.getElementById("keys").children
+		var keyId = midinote - 21
+		if (keyId >= 0 && keyId < keys.length) {
+			if (numSoundPlayersPlaying == 0) {
+				keys[keyId].style.background = ""
+			} else {
+				var intensity;
+				switch (keys[keyId].className) {
+					case "w":
+						intensity = Math.round(255*(1-(numSoundPlayersPlaying/noteRepeats)))
+						keys[keyId].style.background = "rgb(255,"+intensity+","+intensity+")"
+						break;
+					case "b":
+						intensity = Math.round(255*(numSoundPlayersPlaying/noteRepeats))
+						keys[keyId].style.background = "rgb("+intensity+",0,0)"
+						break;
 				}
-			}
-			soundplayer = maxTime_soundplayer
-			//++i;
-			if (!soundplayer || (!soundplayersstorage[midinote][i] && (i < noteRepeats))) {
-				soundplayer = createSoundPlayer(soundchoice, 44100, 5, frequency, 16384)
-				soundplayersstorage[midinote].push(soundplayer)
-			} else {
-			}
-			if (soundplayer.currentTime == soundplayer.duration || soundplayer.currentTime == 0) {
-				//soundplayer.play();
-				soundplayer.load();
-			} else {
-				soundplayer.currentTime = 0;
+				
 			}
 		}
 	}
+	var soundplayersstorages = [[], [], [], []]
+	var soundplayersplaying = new Uint8Array(128)
+	function createOnEndedHandler(midinote) {
+		return function() {
+			--soundplayersplaying[midinote];
+			displayNoteState(midinote, soundplayersplaying[midinote])
+		}
+	}
+	function createOnPlayHandler(midinote) {
+		return function() {
+			++soundplayersplaying[midinote]
+			displayNoteState(midinote, soundplayersplaying[midinote])
+		}
+	}
+	function noteDown(midinote) {
+		var soundchoice = parseInt(document.form.soundchoice.value);
+		var soundplayersstorage = soundplayersstorages[soundchoice]
+		var frequency = 440 * Math.pow(2, ( (midinote - 69) / 12) )
+		var soundplayer;
+		var soundplayers;
+		if (!(midinote < soundplayersstorage.length)) soundplayersstorage[midinote] = []
+		if (!soundplayersstorage[midinote]) soundplayersstorage[midinote] = []
+		soundplayers = soundplayersstorage[midinote]
+		var maxTime = -1;
+		var maxTime_soundplayer;
+		for (var i = 0; i < soundplayers.length; i++)
+		{
+			soundplayer = soundplayers[i]
+			if (soundplayer.currentTime > maxTime) {
+				maxTime_soundplayer = soundplayer;
+				maxTime = soundplayer.currentTime;
+				if (soundplayer.paused || soundplayer.ended) break;
+			}
+		}
+		soundplayer = maxTime_soundplayer
+		//++i;
+		if (!soundplayer || (!soundplayersstorage[midinote][i] && (i < noteRepeats))) {
+			soundplayer = createSoundPlayer(soundchoice, 44100, 5, frequency, 16384)
+			soundplayer.onended = createOnEndedHandler(midinote)
+			//soundplayer.onpause = createOnEndedHandler(midinote)
+			soundplayer.onplay = createOnPlayHandler(midinote)
+			soundplayersstorage[midinote].push(soundplayer)
+		} else {
+		}
+		if (soundplayer.currentTime == soundplayer.duration || soundplayer.currentTime == 0) {
+			//soundplayer.play();
+			soundplayer.load();
+		} else {
+			soundplayer.currentTime = 0;
+		}
+	}
+	function noteUp(midinote) {
+		/*
+		if (!sustain) {
+			var soundchoice = parseInt(document.form.soundchoice.value);
+			var soundplayers = soundplayersstorages[soundchoice][midinote]
+			for (var i = 0; i < soundplayers.length; i++)
+			{
+				var soundplayer = soundplayers[i]
+				setTimeout(function() {soundplayer.pause()}, 10);
+			}
+		}
+		*/
+	}
+	function updateInputTypes() {
+		document.getElementById("input_kb").style.display = document.form.inputchoice_kb.checked?"":"none"
+		document.getElementById("input_vp").style.display = document.form.inputchoice_vp.checked?"":"none"
+	}
+	function createKeyHandler(key, keyId) {
+		return function() {noteDown(keyId+21)}
+	}
 </script>
-
+<style type="text/css">
+	*{box-sizing: border-box;}
+	.w,.b {position: relative; display: inline-block; border: 0.2em solid black;}
+	.w { width:3em; height:11em; margin: 0 -0.1em 0 -0.1em;  background: white; z-index:0;}
+	.b { width:2em; height:7em; margin: 0 -1em 4em -1em; background: black; z-index:1;}
+</style>
+</head>
 <body>
+	<a href="/">back</a><br>
 	<div id="soundplayers"></div>
 	<form name="form" style="height:100%">  
-    <textarea name="log" style="width:100%; height:50%"></textarea>
+    <textarea readonly name="log" style="width:100%; height:50%"></textarea>
     <input type="radio" name="soundchoice" value="0" checked=true>Piano
     <input type="radio" name="soundchoice" value="1">Organ
     <input type="radio" name="soundchoice" value="2">Acoustic Guitar
     <input type="radio" name="soundchoice" value="3">EDM
     <br>
-		<textarea name="input" oninput="this.value=''"></textarea>
+    <input type="checkbox" name="inputchoice_vp" onclick="updateInputTypes()" checked=true>Virtual Piano
+    <input type="checkbox" name="inputchoice_kb" onclick="updateInputTypes()">Keyboard
+    <br>
+		<div id="input_vp">
+			<!--<input type="range" min="1" max="100" value="50" class="slider" id="vp_scale">-->
+			<br>
+<div id="keys"><div class="w"></div><div class="b"></div><div class="w"></div><!--1--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--2--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--3--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--4--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--5--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--6--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--7--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--8--><div type=button class=w></div></div>
+		</div>
+    <div id="input_kb">
+	    Click here to open up the keyboard for mobile ->
+			<textarea name="input" oninput="this.value=''"></textarea>
+		</div>
 	</form>
 	<script>
-		document.body.onkeydown = keyDown
 		document.form.log.value = ""
+		document.body.onkeydown = function (event) {
+			if (document.form.inputchoice_kb.checked) {
+				var keyId = keyCodeMapping.indexOf(event.keyCode)
+				if (keyId != -1) {
+					var midinote = 70 + keyId
+					noteDown(midinote)
+				}
+			}
+		}
+		document.body.onkeyup = function (event) {
+			if (document.form.inputchoice_kb.checked) {
+				var keyId = keyCodeMapping.indexOf(event.keyCode)
+				if (keyId != -1) {
+					var midinote = 70 + keyId
+					noteUp(midinote)
+				}
+			}
+		}
+		var keys = document.getElementById("keys").children
+		for (var keyId = 0; keyId < keys.length; keyId++) {
+			keys[keyId].onclick = createKeyHandler(keys[keyId], keyId)
+		}
 	</script>
+	<sub>Inspired by <a href="https://keithwhor.com/music/">https://keithwhor.com/music/</a></sub>
 </body>
