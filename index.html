@@ -417,7 +417,6 @@
 	<a href="/">back</a><br>
 	<div id="soundplayers"></div>
 	<form name="form" style="height:100%">  
-    <textarea readonly name="log" style="width:100%; height:50%"></textarea>
     <input type="radio" name="soundchoice" value="0" checked=true>Piano
     <input type="radio" name="soundchoice" value="1">Organ
     <input type="radio" name="soundchoice" value="2">Acoustic Guitar
@@ -435,6 +434,8 @@
 	    Click here to open up the keyboard for mobile ->
 			<textarea name="input" oninput="this.value=''"></textarea>
 		</div>
+    <textarea readonly name="log" style="width:100%; height:50%"></textarea>
+	<sub>Inspired by <a href="https://keithwhor.com/music/">https://keithwhor.com/music/</a></sub>
 	</form>
 	<script>
 		document.form.log.value = ""
@@ -461,5 +462,4 @@
 			keys[keyId].onclick = createKeyHandler(keys[keyId], keyId)
 		}
 	</script>
-	<sub>Inspired by <a href="https://keithwhor.com/music/">https://keithwhor.com/music/</a></sub>
 </body>
