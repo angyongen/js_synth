@@ -3,16 +3,43 @@
 <script type="text/javascript">
 	var noteRepeats = 3 //the number of duplicate note audio stored
 	var appendToDocument = false //whether or not note audio is appended to the soundplayers div
-	var keyCodeMapping = [81, 50, 87, 51, 69, 82, 53, 84, 54, 89, 55, 85, 73, 57, 79, 48, 80, 219, 187, 221]
+	var keyCodeMapping = [81, 50, 87, 51, 69, 82, 53, 84, 54, 89, 55, 85, 73, 57, 79, 48, 80, 219, 61, 221]
+	var sampleRate = 44100
+	var volume = 16384
 
+	var totalTime1 = 0
+	var totalTimes1 = 0
+	var min1 = 99999
+	var max1 = 0
+
+	var totalTime2 = 0
+	var totalTimes2 = 0
+	var min2 = 99999
+	var max2 = 0
+
+	var soundplayersstorages = [[], [], [], []]
+	var soundplayersplaying = new Uint8Array(128)
+
+	function resetTimes() {
+		totalTime1 = 0
+		totalTimes1 = 0
+		min1 = 99999
+		max1 = 0
+		totalTime2 = 0
+		totalTimes2 = 0
+		min2 = 99999
+		max2 = 0
+	}
+	function resetStorages() {
+		soundplayersstorages = [[], [], [], []]
+	}
 	function log(x) {
 		var element = document.createElement("pre")
 		//element.innerHTML = x;
 		document.form.log.value += (x+ '\n')
 		document.form.log.scrollTop = document.form.log.scrollHeight
 	}
-
-	function encodeWAVBlob(Channels, SampleRate, BitsPerSample, data) {
+	function encodeWAVBlob1(Channels, SampleRate, BitsPerSample, data) {
 		var t0 = performance.now();
 		//var enc = new TextEncoder();
 
@@ -58,10 +85,61 @@
 		var time = (t1 - t0)
 		if (time < min1) min1 = time
 		if (time > max1) max1 = time
-		//log("t1:"+ time +", avg:" + (totalTime1 += time)/(++totalTimes1) + ", min" + min1 + ", max" + max1);
+		log("t1:"+ time +", avg:" + (totalTime1 += time)/(++totalTimes1) + ", min" + min1 + ", max" + max1);
 
 		return blob//
 	}
+	function encodeWAVBlob2(Channels, SampleRate, BitsPerSample, data) {
+		var t0 = performance.now();
+		//var enc = new TextEncoder();
+
+		var uint16_bytes = function(v) {
+			var PACKED = new Uint8Array(2);
+			new DataView(PACKED.buffer).setUint16(0, v, true/*all values are little endian*/);
+			return PACKED;
+		}
+		var uint32_bytes = function(v) {
+			var PACKED = new Uint8Array(4);
+			new DataView(PACKED.buffer).setUint32(0, v, true/*all values are little endian*/);
+			return PACKED;
+		}
+		//var ChunkID = enc.encode("RIFF")
+		//var ChunkFormat = enc.encode("WAVE")
+		//var SubChunk1ID = enc.encode("fmt ")
+		var SubChunk1Size = 16
+		var AudioFormat = 1 // Values other than 1 indicate compression.
+		var ByteRate = SampleRate * Channels * BitsPerSample / 8 //bytes per second
+		var BlockAlign = Channels * BitsPerSample / 8  //#bytes for 1 sample, all channels
+		//var SubChunk2ID = enc.encode("data")
+		var SubChunk2Size =  data.length
+		var ChunkSize = 36 + SubChunk2Size
+
+		var blob = new Blob([
+			"RIFF",//ChunkID,
+			uint32_bytes(ChunkSize),
+			"WAVE",//ChunkFormat,
+			"fmt ",//SubChunk1ID,
+			uint32_bytes(SubChunk1Size),
+			uint16_bytes(AudioFormat),
+			uint16_bytes(Channels),
+			uint32_bytes(SampleRate),
+			uint32_bytes(ByteRate),
+			uint16_bytes(BlockAlign),
+			uint16_bytes(BitsPerSample),
+			"data",//SubChunk2ID,
+			uint32_bytes(SubChunk2Size),
+			data
+		], {type: 'audio/wav'})
+
+		var t1 = performance.now();
+		var time = (t1 - t0)
+		if (time < min1) min1 = time
+		if (time > max1) max1 = time
+		log("t1:"+ time +", avg:" + (totalTime1 += time)/(++totalTimes1) + ", min" + min1 + ", max" + max1);
+
+		return blob//
+	}
+	var encodeWAVBlob = encodeWAVBlob1;
 
 	var modulations = [
 		function(i, sampleRate, frequency, x) { return 1 * Math.sin(2 * Math.PI * ((i / sampleRate) * frequency) + x); },
@@ -75,15 +153,6 @@
 		function(i, sampleRate, frequency, x) { return 0.5 * Math.sin(0.5 * Math.PI * ((i / sampleRate) * frequency) + x); },
 		function(i, sampleRate, frequency, x) { return 0.5 * Math.sin(0.25 * Math.PI * ((i / sampleRate) * frequency) + x); }
 	]
-	var totalTime1 = 0
-	var totalTimes1 = 0
-	var min1 = 99999
-	var max1 = 0
-
-	var totalTime2 = 0
-	var totalTimes2 = 0
-	var min2 = 99999
-	var max2 = 0
 	function piano_wave(i, sampleRate, frequency)
 	{
 		//var base = modulations[0];
@@ -334,8 +403,6 @@
 			}
 		}
 	}
-	var soundplayersstorages = [[], [], [], []]
-	var soundplayersplaying = new Uint8Array(128)
 	function createOnEndedHandler(midinote) {
 		return function() {
 			--soundplayersplaying[midinote];
@@ -349,6 +416,7 @@
 		}
 	}
 	function noteDown(midinote) {
+		var time = parseInt(document.form.time.value)
 		var soundchoice = parseInt(document.form.soundchoice.value);
 		var soundplayersstorage = soundplayersstorages[soundchoice]
 		var frequency = 440 * Math.pow(2, ( (midinote - 69) / 12) )
@@ -371,7 +439,7 @@
 		soundplayer = maxTime_soundplayer
 		//++i;
 		if (!soundplayer || (!soundplayersstorage[midinote][i] && (i < noteRepeats))) {
-			soundplayer = createSoundPlayer(soundchoice, 44100, 5, frequency, 16384)
+			soundplayer = createSoundPlayer(soundchoice, sampleRate, time, frequency, 16384)
 			soundplayer.onended = createOnEndedHandler(midinote)
 			//soundplayer.onpause = createOnEndedHandler(midinote)
 			soundplayer.onplay = createOnPlayHandler(midinote)
@@ -408,42 +476,57 @@
 </script>
 <style type="text/css">
 	*{box-sizing: border-box;}
+	form{ font-size:large}
+	input[type="checkbox"]{width: 1em;	height: 1em;}
+	input[type="radio"]{width: 1em;	height: 1em;}
+	input[type="range"]{width: 40em;	height: 1em;}
+	#input_vp{font-size:small}
 	.w,.b {position: relative; display: inline-block; border: 0.2em solid black;}
 	.w { width:3em; height:11em; margin: 0 -0.1em 0 -0.1em;  background: white; z-index:0;}
 	.b { width:2em; height:7em; margin: 0 -1em 4em -1em; background: black; z-index:1;}
 </style>
 </head>
 <body>
-	<a href="/">back</a><br>
+	<a href="/" style="font-size: 200%">back</a><br>
 	<div id="soundplayers"></div>
 	<form name="form" style="height:100%">  
-    <input type="radio" name="soundchoice" value="0" checked=true>Piano
+    <input type="radio" name="soundchoice" value="0">Piano
     <input type="radio" name="soundchoice" value="1">Organ
-    <input type="radio" name="soundchoice" value="2">Acoustic Guitar
+    <input type="radio" name="soundchoice" value="2" checked=true>Acoustic Guitar
     <input type="radio" name="soundchoice" value="3">EDM
     <br>
     <input type="checkbox" name="inputchoice_vp" onclick="updateInputTypes()" checked=true>Virtual Piano
     <input type="checkbox" name="inputchoice_kb" onclick="updateInputTypes()">Keyboard
     <br>
+    Notes Length = <span id="time_display"></span>
+    <input type="range" min="1" max="10" value="5" class="slider" name="time" onchange="document.getElementById('time_display').textContent = this.value; resetTimes();resetStorages();">
+			
+    <div id="input_kb">
+    	Keyboard Offset = <span id="kb_offset_display"></span>
+    	<input type="range" min="21" max="89" value="50" class="slider" name="kb_offset" onchange="document.getElementById('kb_offset_display').textContent = this.value">
+    	<br>
+	    Click here to open up the keyboard for mobile ->
+			<textarea name="input" oninput="this.value=''"></textarea>
+		</div>
 		<div id="input_vp">
 			<!--<input type="range" min="1" max="100" value="50" class="slider" id="vp_scale">-->
 			<br>
 <div id="keys"><div class="w"></div><div class="b"></div><div class="w"></div><!--1--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--2--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--3--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--4--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--5--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--6--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--7--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--8--><div type=button class=w></div></div>
 		</div>
-    <div id="input_kb">
-	    Click here to open up the keyboard for mobile ->
-			<textarea name="input" oninput="this.value=''"></textarea>
-		</div>
     <textarea readonly name="log" style="width:100%; height:50%"></textarea>
 	<sub>Inspired by <a href="https://keithwhor.com/music/">https://keithwhor.com/music/</a></sub>
 	</form>
 	<script>
+		document.getElementById('kb_offset_display').textContent = document.form.kb_offset.value
+		document.getElementById('time_display').textContent = document.form.time.value
+		updateInputTypes();
+
 		document.form.log.value = ""
 		document.body.onkeydown = function (event) {
 			if (document.form.inputchoice_kb.checked) {
 				var keyId = keyCodeMapping.indexOf(event.keyCode)
 				if (keyId != -1) {
-					var midinote = 70 + keyId
+					var midinote = parseInt(document.form.kb_offset.value) + keyId
 					noteDown(midinote)
 				}
 			}
@@ -452,14 +535,14 @@
 			if (document.form.inputchoice_kb.checked) {
 				var keyId = keyCodeMapping.indexOf(event.keyCode)
 				if (keyId != -1) {
-					var midinote = 70 + keyId
+					var midinote = parseInt(document.form.kb_offset.value) + keyId
 					noteUp(midinote)
 				}
 			}
 		}
 		var keys = document.getElementById("keys").children
 		for (var keyId = 0; keyId < keys.length; keyId++) {
-			keys[keyId].onclick = createKeyHandler(keys[keyId], keyId)
+			keys[keyId].onmousedown = createKeyHandler(keys[keyId], keyId)
 		}
 	</script>
 </body>
