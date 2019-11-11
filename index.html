@@ -1,5 +1,6 @@
 <head>
 <meta charset="utf-8" />
+<title>Javascript Synthesizer</title>
 <script type="text/javascript">
 	var noteRepeats = 3 //the number of duplicate note audio stored
 	var appendToDocument = false //whether or not note audio is appended to the soundplayers div
@@ -492,10 +493,10 @@
 	<form name="form" style="height:100%">  
     <input type="radio" name="soundchoice" value="0">Piano
     <input type="radio" name="soundchoice" value="1">Organ
-    <input type="radio" name="soundchoice" value="2" checked=true>Acoustic Guitar
+    <input type="radio" name="soundchoice" value="2" checked>Acoustic Guitar
     <input type="radio" name="soundchoice" value="3">EDM
     <br>
-    <input type="checkbox" name="inputchoice_vp" onclick="updateInputTypes()" checked=true>Virtual Piano
+    <input type="checkbox" name="inputchoice_vp" onclick="updateInputTypes()" checked>Virtual Piano
     <input type="checkbox" name="inputchoice_kb" onclick="updateInputTypes()">Keyboard
     <br>
     Notes Length = <span id="time_display"></span>
@@ -511,7 +512,7 @@
 		<div id="input_vp">
 			<!--<input type="range" min="1" max="100" value="50" class="slider" id="vp_scale">-->
 			<br>
-<div id="keys"><div class="w"></div><div class="b"></div><div class="w"></div><!--1--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--2--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--3--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--4--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--5--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--6--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--7--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--8--><div type=button class=w></div></div>
+<div id="keys"><div class="w"></div><div class="b"></div><div class="w"></div><!--1--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--2--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--3--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--4--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--5--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--6--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--7--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--8--><div class=w></div></div>
 		</div>
     <textarea readonly name="log" style="width:100%; height:50%"></textarea>
 	<sub>Inspired by <a href="https://keithwhor.com/music/">https://keithwhor.com/music/</a></sub>
