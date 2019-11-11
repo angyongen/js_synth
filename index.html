@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <head>
 <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Javascript Synthesizer</title>
 <script type="text/javascript">
 	var noteRepeats = 3 //the number of duplicate note audio stored
@@ -472,9 +473,6 @@
 		document.getElementById("input_kb").style.display = document.form.inputchoice_kb.checked?"":"none"
 		document.getElementById("input_vp").style.display = document.form.inputchoice_vp.checked?"":"none"
 	}
-	function createKeyHandler( key, keyId) {
-		return function(event) {event.preventDefault(); noteDown(keyId+21)}
-	}
 </script>
 <style type="text/css">
 	*{box-sizing: border-box;}
@@ -544,11 +542,12 @@
 		}
 		var keys = document.getElementById("keys").children
 		for (var keyId = 0; keyId < keys.length; keyId++) {
-			keys[keyId].onclick = createKeyHandler(keys[keyId], keyId)
-		}
-		for (var keyId = 0; keyId < keys.length; keyId++) {
-			var f = createKeyHandler(keys[keyId], keyId)
-			keys[keyId].ontouchstart = function(e) {e.preventDefault();f(e);};
+			keys[keyId].id = keyId;
+			keys[keyId].onclick = function(e) {noteDown(parseInt(this.id)+21)}
+			keys[keyId].ontouchstart = function(e) {
+				e.preventDefault();
+				noteDown(parseInt(this.id)+21)
+			};
 		}
 	</script>
 </body>
