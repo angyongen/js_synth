@@ -479,7 +479,7 @@
 	form{ font-size:20px}
 	input[type="checkbox"]{width: 1em;	height: 1em;}
 	input[type="radio"]{width: 1em;	height: 1em;}
-	input[type="range"]{width: 40em;	height: 2em;}
+	input[type="range"]{width: 100%;	height: 2em;}
 	#input_vp{font-size:16px}
 	.w,.b {position: relative; display: inline-block; border: 0.2em solid black;}
 	.w { width:3em; height:11em; margin: 0 -0.1em 0 -0.1em;  background: white; z-index:0;}
@@ -494,10 +494,10 @@
     <input type="radio" name="soundchoice" value="1">Organ
     <input type="radio" name="soundchoice" value="2" checked>Acoustic Guitar
     <input type="radio" name="soundchoice" value="3">EDM
-    <br>
+    <br><br>
     <input type="checkbox" name="inputchoice_vp" onclick="updateInputTypes()" checked>Virtual Piano
     <input type="checkbox" name="inputchoice_kb" onclick="updateInputTypes()">Keyboard
-    <br>
+    <br><br>
     Notes Length = <span id="time_display"></span>
     <input type="range" min="1" max="10" value="5" class="slider" name="time" oninput="document.getElementById('time_display').textContent = this.value; resetTimes();resetStorages();">
 			
