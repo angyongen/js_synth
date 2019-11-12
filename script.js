@@ -14,8 +14,16 @@
 	var min2 = 99999
 	var max2 = 0
 
+
 	var soundplayersstorages = [[], [], [], []]
-	var soundplayersplaying = new Uint8Array(128)
+	var soundplayersstorage
+	var soundchoice
+	var time
+	function updateSoundChoice() {
+		soundchoice = parseInt(document.form.soundchoice.value);
+		soundplayersstorage = soundplayersstorages[soundchoice]
+	}
+	//var soundplayersplaying = new Uint8Array(128)
 
 	function resetTimes() {
 		totalTime1 = 0
@@ -30,6 +38,13 @@
 	function resetStorages() {
 		soundplayersstorages = [[], [], [], []]
 	}
+	function updateTimeChoice() {
+		time = parseInt(document.form.time.value)
+		document.getElementById('time_display').textContent = time;
+		resetTimes();
+		resetStorages();
+	}
+	
 	function log(x) {
 		var element = document.createElement("pre")
 		//element.innerHTML = x;
@@ -378,21 +393,21 @@
 		//soundplayer.load();
 		return soundplayer;
 	}
-	function displayNoteState(midinote, numSoundPlayersPlaying) {
+	function displayNoteState(midinote, percentage) {
 		var keys = document.getElementById("keys").children
 		var keyId = midinote - 21
 		if (keyId >= 0 && keyId < keys.length) {
-			if (numSoundPlayersPlaying == 0) {
+			if (percentage == 0) {
 				keys[keyId].style.background = ""
 			} else {
 				var intensity;
 				switch (keys[keyId].className) {
 					case "w":
-						intensity = Math.round(255*(1-(numSoundPlayersPlaying/noteRepeats)))
+						intensity = Math.round(255*(1-percentage))
 						keys[keyId].style.background = "rgb(255,"+intensity+","+intensity+")"
 						break;
 					case "b":
-						intensity = Math.round(255*(numSoundPlayersPlaying/noteRepeats))
+						intensity = Math.round(255*percentage)
 						keys[keyId].style.background = "rgb("+intensity+",0,0)"
 						break;
 				}
@@ -400,22 +415,18 @@
 			}
 		}
 	}
-	function createOnEndedHandler(midinote) {
+	function createTimeUpdateHandler(soundplayers, midinote) {
 		return function() {
-			--soundplayersplaying[midinote];
-			displayNoteState(midinote, soundplayersplaying[midinote])
-		}
-	}
-	function createOnPlayHandler(midinote) {
-		return function() {
-			++soundplayersplaying[midinote]
-			displayNoteState(midinote, soundplayersplaying[midinote])
+			var percentageSum = 0;
+			for (var i = 0; i < soundplayers.length; i++)
+			{
+				soundplayer = soundplayers[i]
+				percentageSum += 1 - (soundplayer.currentTime / soundplayer.duration);
+			}
+			displayNoteState(midinote, percentageSum/noteRepeats)
 		}
 	}
 	function noteDown(midinote) {
-		var time = parseInt(document.form.time.value)
-		var soundchoice = parseInt(document.form.soundchoice.value);
-		var soundplayersstorage = soundplayersstorages[soundchoice]
 		var frequency = 440 * Math.pow(2, ( (midinote - 69) / 12) )
 		var soundplayer;
 		var soundplayers;
@@ -437,9 +448,10 @@
 		//++i;
 		if (!soundplayer || (!soundplayersstorage[midinote][i] && (i < noteRepeats))) {
 			soundplayer = createSoundPlayer(soundchoice, sampleRate, time, frequency, 16384)
-			soundplayer.onended = createOnEndedHandler(midinote)
+			soundplayer.ontimeupdate = createTimeUpdateHandler(soundplayersstorage[midinote], midinote);
+			//soundplayer.onended = createOnEndedHandler(midinote)
 			//soundplayer.onpause = createOnEndedHandler(midinote)
-			soundplayer.onplay = createOnPlayHandler(midinote)
+			//soundplayer.onplay = createOnPlayHandler(midinote)
 			soundplayersstorage[midinote].push(soundplayer)
 		} else {
 		}
@@ -454,7 +466,7 @@
 		/*
 		if (!sustain) {
 			var soundchoice = parseInt(document.form.soundchoice.value);
-			var soundplayers = soundplayersstorages[soundchoice][midinote]
+			var soundplayers = soundplayersstorage[midinote]
 			for (var i = 0; i < soundplayers.length; i++)
 			{
 				var soundplayer = soundplayers[i]
