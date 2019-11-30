@@ -14,6 +14,9 @@
 	var min2 = 99999
 	var max2 = 0
 
+	var audioCtx = new AudioContext();
+
+	var base64mode = true
 
 	var soundplayersstorages = [[], [], [], []]
 	var soundplayersstorage
@@ -173,7 +176,6 @@
 
 		return 'data:audio/wav;base64,' + escape(window.btoa(str));
 	}
-	//var encodeWAVBlob = encodeWAVBlob1;
 
 	var modulations = [
 		function(i, sampleRate, frequency, x) { return 1 * Math.sin(2 * Math.PI * ((i / sampleRate) * frequency) + x); },
@@ -399,19 +401,27 @@
 		if (time < min2) min2 = time
 		if (time > max2) max2 = time
 		log("t2:"+ time +", avg:" + (totalTime2 += time)/(++totalTimes2) + ", min" + min2 + ", max" + max2);
-		//return encodeWAVbase64(1, sampleRate, 16, data)
-		return URL.createObjectURL(encodeWAVBlob(1, sampleRate, 16, data))
+
+		if (base64mode) {
+			return encodeWAVbase64(1, sampleRate, 16, data)
+		} else {
+			return URL.createObjectURL(encodeWAVBlob(1, sampleRate, 16, data))
+		}
 	}
 	function createSoundPlayer(sound, sampleRate, time, frequency, volume) {
 		var src = generateWAV(sound, sampleRate, time, frequency, volume)
 		var soundplayer = new Audio(src);
+
+		var source = audioCtx.createMediaElementSource(soundplayer);
+		source.connect(audioCtx.destination);
+
 		soundplayer.setAttribute('type', 'audio/wav');
 		soundplayer.autoplay = false;
 		if (appendToDocument) {
 			soundplayer.controls = true;
 			document.getElementById("soundplayers").appendChild(soundplayer)
 		}
-		//soundplayer.onloadeddata = function(e) { e.target.play(); };
+		soundplayer.onloadeddata = function(e) { e.target.play(); };
 		//soundplayer.onended = function() {soundplayer = null; URL.revokeObjectURL(src)}
 		//soundplayer.load();
 		return soundplayer;
@@ -480,10 +490,7 @@
 		}
 		if (soundplayer.currentTime == soundplayer.duration || soundplayer.currentTime == 0) {
 			soundplayer.load();
-			var audioCtx = new AudioContext();
-			var source = audioCtx.createMediaElementSource(soundplayer);
-			source.connect(audioCtx.destination);
-			soundplayer.play();
+			//soundplayer.play();
 		} else {
 			soundplayer.currentTime = 0;
 		}
