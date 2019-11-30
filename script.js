@@ -16,7 +16,7 @@
 
 	var audioCtx = new AudioContext();
 
-	var base64mode = true
+	var base64mode = false
 
 	var soundplayersstorages = [[], [], [], []]
 	var soundplayersstorage
@@ -423,7 +423,7 @@
 		}
 		//soundplayer.onloadeddata = function(e) { e.target.play(); };
 		//soundplayer.onended = function() {soundplayer = null; URL.revokeObjectURL(src)}
-		//soundplayer.load();
+		soundplayer.load();
 		return soundplayer;
 	}
 	function displayNoteState(midinote, percentage) {
