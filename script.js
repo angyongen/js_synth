@@ -423,7 +423,7 @@
 		}
 		//soundplayer.onloadeddata = function(e) { e.target.play(); };
 		//soundplayer.onended = function() {soundplayer = null; URL.revokeObjectURL(src)}
-		soundplayer.load();
+		//soundplayer.load();
 		return soundplayer;
 	}
 	function displayNoteState(midinote, percentage) {
