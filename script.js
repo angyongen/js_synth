@@ -421,7 +421,7 @@
 			soundplayer.controls = true;
 			document.getElementById("soundplayers").appendChild(soundplayer)
 		}
-		soundplayer.onloadeddata = function(e) { e.target.play(); };
+		//soundplayer.onloadeddata = function(e) { e.target.play(); };
 		//soundplayer.onended = function() {soundplayer = null; URL.revokeObjectURL(src)}
 		//soundplayer.load();
 		return soundplayer;
@@ -489,8 +489,8 @@
 		} else {
 		}
 		if (soundplayer.currentTime == soundplayer.duration || soundplayer.currentTime == 0) {
-			soundplayer.load();
-			//soundplayer.play();
+			//soundplayer.load();
+			soundplayer.play();
 		} else {
 			soundplayer.currentTime = 0;
 		}
