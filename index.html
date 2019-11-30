@@ -35,7 +35,7 @@
     	<input type="range" min="21" max="89" value="48" class="slider" name="kb_offset" oninput="document.getElementById('kb_offset_display').textContent = this.value">
     	<br>
 	    Click here to open up the keyboard for mobile ->
-			<textarea name="input" oninput="this.value=''"></textarea>
+			<textarea name="input"></textarea>
 		</div>
 		<div id="input_vp" style="font-size:12px">
 			<!--<input type="range" min="1" max="100" value="50" class="slider" id="vp_scale">-->
@@ -53,7 +53,14 @@
 		updateTimeChoice();
 
 		document.form.log.value = ""
+		document.form.input.oninput = function(e) {
+			var keyId = 'q2w3er5t6y7ui9o0p[=]'.indexOf([this.value[this.value.length - 1]])
+			this.value='';
+			var midinote = parseInt(document.form.kb_offset.value) + keyId
+			noteDown(midinote)
+		}
 		document.body.onkeydown = function (event) {
+			event.preventDefault();
 			if (document.form.inputchoice_kb.checked) {
 				var keyId = keyCodeMapping.indexOf(event.keyCode)
 				if (keyId != -1) {

@@ -51,7 +51,7 @@
 		document.form.log.value += (x+ '\n')
 		document.form.log.scrollTop = document.form.log.scrollHeight
 	}
-	function encodeWAVBlob1(Channels, SampleRate, BitsPerSample, data) {
+	function encodeWAVBlob(Channels, SampleRate, BitsPerSample, data) {
 		var t0 = performance.now();
 		//var enc = new TextEncoder();
 
@@ -101,19 +101,41 @@
 
 		return blob//
 	}
-	function encodeWAVBlob2(Channels, SampleRate, BitsPerSample, data) {
+	function arrayBufferToString(buffer){
+//https://stackoverflow.com/questions/6965107/converting-between-strings-and-arraybuffers
+    var bufView = new Uint16Array(buffer);
+    var length = bufView.length;
+    var result = '';
+    var addition = Math.pow(2,16)-1;
+
+    for(var i = 0;i<length;i+=addition){
+
+        if(i + addition > length){
+            addition = length - i;
+        }
+        result += String.fromCharCode.apply(null, bufView.subarray(i,i+addition));
+    }
+
+    return result;
+
+}
+	function encodeWAVbase64(Channels, SampleRate, BitsPerSample, data) {
 		var t0 = performance.now();
 		//var enc = new TextEncoder();
+		var c = new TextDecoder("utf-8");
 
-		var uint16_bytes = function(v) {
+		var uint16_string = function(v) {
 			var PACKED = new Uint8Array(2);
 			new DataView(PACKED.buffer).setUint16(0, v, true/*all values are little endian*/);
-			return PACKED;
+			return String.fromCharCode(PACKED[0]) + String.fromCharCode(PACKED[1])
+			//arrayBufferToString([PACKED[0],PACKED[1]]);
 		}
-		var uint32_bytes = function(v) {
+		var uint32_string = function(v) {
 			var PACKED = new Uint8Array(4);
 			new DataView(PACKED.buffer).setUint32(0, v, true/*all values are little endian*/);
-			return PACKED;
+			return String.fromCharCode(PACKED[0]) + String.fromCharCode(PACKED[1]) + String.fromCharCode(PACKED[2]) + String.fromCharCode(PACKED[3])
+			//c.decode(PACKED) 
+			//arrayBufferToString([PACKED[0],PACKED[1],PACKED[2],PACKED[3]]);
 		}
 		//var ChunkID = enc.encode("RIFF")
 		//var ChunkFormat = enc.encode("WAVE")
@@ -126,22 +148,22 @@
 		var SubChunk2Size =  data.length
 		var ChunkSize = 36 + SubChunk2Size
 
-		var blob = new Blob([
+		var str = [
 			"RIFF",//ChunkID,
-			uint32_bytes(ChunkSize),
+			uint32_string(ChunkSize),
 			"WAVE",//ChunkFormat,
 			"fmt ",//SubChunk1ID,
-			uint32_bytes(SubChunk1Size),
-			uint16_bytes(AudioFormat),
-			uint16_bytes(Channels),
-			uint32_bytes(SampleRate),
-			uint32_bytes(ByteRate),
-			uint16_bytes(BlockAlign),
-			uint16_bytes(BitsPerSample),
+			uint32_string(SubChunk1Size),
+			uint16_string(AudioFormat),
+			uint16_string(Channels),
+			uint32_string(SampleRate),
+			uint32_string(ByteRate),
+			uint16_string(BlockAlign),
+			uint16_string(BitsPerSample),
 			"data",//SubChunk2ID,
-			uint32_bytes(SubChunk2Size),
-			data
-		], {type: 'audio/wav'})
+			uint32_string(SubChunk2Size),
+			arrayBufferToString(data)
+		].join("")
 
 		var t1 = performance.now();
 		var time = (t1 - t0)
@@ -149,9 +171,9 @@
 		if (time > max1) max1 = time
 		log("t1:"+ time +", avg:" + (totalTime1 += time)/(++totalTimes1) + ", min" + min1 + ", max" + max1);
 
-		return blob//
+		return 'data:audio/wav;base64,' + escape(window.btoa(str));
 	}
-	var encodeWAVBlob = encodeWAVBlob1;
+	//var encodeWAVBlob = encodeWAVBlob1;
 
 	var modulations = [
 		function(i, sampleRate, frequency, x) { return 1 * Math.sin(2 * Math.PI * ((i / sampleRate) * frequency) + x); },
@@ -377,10 +399,11 @@
 		if (time < min2) min2 = time
 		if (time > max2) max2 = time
 		log("t2:"+ time +", avg:" + (totalTime2 += time)/(++totalTimes2) + ", min" + min2 + ", max" + max2);
-		return encodeWAVBlob(1, sampleRate, 16, data)
+		//return encodeWAVbase64(1, sampleRate, 16, data)
+		return URL.createObjectURL(encodeWAVBlob(1, sampleRate, 16, data))
 	}
 	function createSoundPlayer(sound, sampleRate, time, frequency, volume) {
-		var src = URL.createObjectURL(generateWAV(sound, sampleRate, time, frequency, volume))
+		var src = generateWAV(sound, sampleRate, time, frequency, volume)
 		var soundplayer = new Audio(src);
 		soundplayer.setAttribute('type', 'audio/wav');
 		soundplayer.autoplay = false;
@@ -388,7 +411,7 @@
 			soundplayer.controls = true;
 			document.getElementById("soundplayers").appendChild(soundplayer)
 		}
-		soundplayer.onloadeddata = function(e) { e.target.play(); };
+		//soundplayer.onloadeddata = function(e) { e.target.play(); };
 		//soundplayer.onended = function() {soundplayer = null; URL.revokeObjectURL(src)}
 		//soundplayer.load();
 		return soundplayer;
@@ -456,8 +479,11 @@
 		} else {
 		}
 		if (soundplayer.currentTime == soundplayer.duration || soundplayer.currentTime == 0) {
-			//soundplayer.play();
 			soundplayer.load();
+			var audioCtx = new AudioContext();
+			var source = audioCtx.createMediaElementSource(soundplayer);
+			source.connect(audioCtx.destination);
+			soundplayer.play();
 		} else {
 			soundplayer.currentTime = 0;
 		}
