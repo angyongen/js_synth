@@ -356,7 +356,7 @@
 			++i;
 		}
 	}
-	function generateWAV(sound, sampleRate, time, frequency, volume)
+	function generateWAV_16(sound, sampleRate, time, frequency, volume)
 	{
 		var decayEnd = (sampleRate * time) | 0;
 		var data = new Uint8Array(new ArrayBuffer(decayEnd * 2));
@@ -402,14 +402,16 @@
 		if (time > max2) max2 = time
 		log("t2:"+ time +", avg:" + (totalTime2 += time)/(++totalTimes2) + ", min" + min2 + ", max" + max2);
 
-		if (base64mode) {
-			return encodeWAVbase64(1, sampleRate, 16, data)
-		} else {
-			return URL.createObjectURL(encodeWAVBlob(1, sampleRate, 16, data))
-		}
+		return data
 	}
 	function createSoundPlayer(sound, sampleRate, time, frequency, volume) {
-		var src = generateWAV(sound, sampleRate, time, frequency, volume)
+		var data = generateWAV(sound, sampleRate, time, frequency, volume)
+		var src
+		if (base64mode) {
+			src = encodeWAVbase64(1, sampleRate, 16, data)
+		} else {
+			src = URL.createObjectURL(encodeWAVBlob(1, sampleRate, 16, data))
+		}
 		var soundplayer = new Audio(src);
 
 		var source = audioCtx.createMediaElementSource(soundplayer);
