@@ -58,7 +58,7 @@
 
 		document.form.log.value = ""
 		document.form.input.oninput = function(e) {
-			var keyId = 'q2w3er5t6y7ui9o0p[=]'.indexOf(this.value[this.value.length - 1].toLowerCase())
+			var keyId = 'AWSEDFTGYHJIKL'.indexOf(this.value[this.value.length - 1].toUpperCase())
 			this.value='';
 			var midinote = parseInt(document.form.kb_offset.value) + keyId
 			noteDown(midinote)
