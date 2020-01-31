@@ -3,7 +3,11 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Javascript Synthesizer</title>
+<script src=".\settings.js"></script>
+<script src=".\sounds.js"></script>
+<script src=".\wav.js"></script>
 <script src=".\script.js"></script>
+<script src=".\web_audio_api.js"></script>
 <style type="text/css">
 	*{box-sizing: border-box;}
 	form{ font-size:20px}
@@ -19,10 +23,10 @@
 	<a href="/" style="font-size: 200%">back</a><br>
 	<div id="soundplayers"></div>
 	<form name="form" style="height:100%">  
-    <input type="radio" name="soundchoice" onclick="updateSoundChoice()" value="0">Piano
-    <input type="radio" name="soundchoice" onclick="updateSoundChoice()" value="1">Organ
+    <input type="radio" name="soundchoice" onclick="updateSoundChoice()" value="0" disabled>Piano
+    <input type="radio" name="soundchoice" onclick="updateSoundChoice()" value="1" disabled>Organ
     <input type="radio" name="soundchoice" onclick="updateSoundChoice()" value="2" checked>Acoustic Guitar
-    <input type="radio" name="soundchoice" onclick="updateSoundChoice()" value="3">EDM
+    <input type="radio" name="soundchoice" onclick="updateSoundChoice()" value="3" disabled>EDM
     <br><br>
     <input type="checkbox" name="inputchoice_vp" onclick="updateInputTypes()" checked>Virtual Piano
     <input type="checkbox" name="inputchoice_kb" onclick="updateInputTypes()">Keyboard

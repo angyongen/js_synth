@@ -1,362 +1,11 @@
-	var noteRepeats = 3 //the number of duplicate note audio stored
-	var appendToDocument = false //whether or not note audio is appended to the soundplayers div
-	var keyCodeMapping = [81, 50, 87, 51, 69, 82, 53, 84, 54, 89, 55, 85, 73, 57, 79, 48, 80, 219, 61, 221]
-	var sampleRate = 44100
-	var volume = 16384
 
-	var totalTime1 = 0
-	var totalTimes1 = 0
-	var min1 = 99999
-	var max1 = 0
-
-	var totalTime2 = 0
-	var totalTimes2 = 0
-	var min2 = 99999
-	var max2 = 0
-
-	var audioCtx = new AudioContext();
-
-	var base64mode = false
-
-	var soundplayersstorages = [[], [], [], []]
-	var soundplayersstorage
-	var soundchoice
-	var time
-	function updateSoundChoice() {
-		soundchoice = parseInt(document.form.soundchoice.value);
-		soundplayersstorage = soundplayersstorages[soundchoice]
-	}
-	//var soundplayersplaying = new Uint8Array(128)
-
-	function resetTimes() {
-		totalTime1 = 0
-		totalTimes1 = 0
-		min1 = 99999
-		max1 = 0
-		totalTime2 = 0
-		totalTimes2 = 0
-		min2 = 99999
-		max2 = 0
-	}
-	function resetStorages() {
-		soundplayersstorages = [[], [], [], []]
-	}
-	function updateTimeChoice() {
-		time = parseInt(document.form.time.value)
-		document.getElementById('time_display').textContent = time;
-		resetTimes();
-		resetStorages();
-	}
-	
 	function log(x) {
 		var element = document.createElement("pre")
 		//element.innerHTML = x;
 		document.form.log.value += (x+ '\n')
 		document.form.log.scrollTop = document.form.log.scrollHeight
 	}
-	function encodeWAVBlob(Channels, SampleRate, BitsPerSample, data) {
-		var t0 = performance.now();
-		//var enc = new TextEncoder();
-
-		var uint16_bytes = function(v) {
-			var PACKED = new Uint8Array(2);
-			new DataView(PACKED.buffer).setUint16(0, v, true/*all values are little endian*/);
-			return PACKED;
-		}
-		var uint32_bytes = function(v) {
-			var PACKED = new Uint8Array(4);
-			new DataView(PACKED.buffer).setUint32(0, v, true/*all values are little endian*/);
-			return PACKED;
-		}
-		//var ChunkID = enc.encode("RIFF")
-		//var ChunkFormat = enc.encode("WAVE")
-		//var SubChunk1ID = enc.encode("fmt ")
-		var SubChunk1Size = 16
-		var AudioFormat = 1 // Values other than 1 indicate compression.
-		var ByteRate = SampleRate * Channels * BitsPerSample / 8 //bytes per second
-		var BlockAlign = Channels * BitsPerSample / 8  //#bytes for 1 sample, all channels
-		//var SubChunk2ID = enc.encode("data")
-		var SubChunk2Size =  data.length
-		var ChunkSize = 36 + SubChunk2Size
-
-		var blob = new Blob([
-			"RIFF",//ChunkID,
-			uint32_bytes(ChunkSize),
-			"WAVE",//ChunkFormat,
-			"fmt ",//SubChunk1ID,
-			uint32_bytes(SubChunk1Size),
-			uint16_bytes(AudioFormat),
-			uint16_bytes(Channels),
-			uint32_bytes(SampleRate),
-			uint32_bytes(ByteRate),
-			uint16_bytes(BlockAlign),
-			uint16_bytes(BitsPerSample),
-			"data",//SubChunk2ID,
-			uint32_bytes(SubChunk2Size),
-			data
-		], {type: 'audio/wav'})
-
-		var t1 = performance.now();
-		var time = (t1 - t0)
-		if (time < min1) min1 = time
-		if (time > max1) max1 = time
-		log("t1:"+ time +", avg:" + (totalTime1 += time)/(++totalTimes1) + ", min" + min1 + ", max" + max1);
-
-		return blob//
-	}
-	function arrayBufferToString(buffer){
-//https://stackoverflow.com/questions/6965107/converting-between-strings-and-arraybuffers
-    var bufView = new Uint16Array(buffer);
-    var length = bufView.length;
-    var result = '';
-    var addition = Math.pow(2,16)-1;
-
-    for(var i = 0;i<length;i+=addition){
-
-        if(i + addition > length){
-            addition = length - i;
-        }
-        result += String.fromCharCode.apply(null, bufView.subarray(i,i+addition));
-    }
-
-    return result;
-
-}
-	function encodeWAVbase64(Channels, SampleRate, BitsPerSample, data) {
-		var t0 = performance.now();
-		//var enc = new TextEncoder();
-		var c = new TextDecoder("utf-8");
-
-		var uint16_string = function(v) {
-			var PACKED = new Uint8Array(2);
-			new DataView(PACKED.buffer).setUint16(0, v, true/*all values are little endian*/);
-			return String.fromCharCode(PACKED[0]) + String.fromCharCode(PACKED[1])
-			//arrayBufferToString([PACKED[0],PACKED[1]]);
-		}
-		var uint32_string = function(v) {
-			var PACKED = new Uint8Array(4);
-			new DataView(PACKED.buffer).setUint32(0, v, true/*all values are little endian*/);
-			return String.fromCharCode(PACKED[0]) + String.fromCharCode(PACKED[1]) + String.fromCharCode(PACKED[2]) + String.fromCharCode(PACKED[3])
-			//c.decode(PACKED) 
-			//arrayBufferToString([PACKED[0],PACKED[1],PACKED[2],PACKED[3]]);
-		}
-		//var ChunkID = enc.encode("RIFF")
-		//var ChunkFormat = enc.encode("WAVE")
-		//var SubChunk1ID = enc.encode("fmt ")
-		var SubChunk1Size = 16
-		var AudioFormat = 1 // Values other than 1 indicate compression.
-		var ByteRate = SampleRate * Channels * BitsPerSample / 8 //bytes per second
-		var BlockAlign = Channels * BitsPerSample / 8  //#bytes for 1 sample, all channels
-		//var SubChunk2ID = enc.encode("data")
-		var SubChunk2Size =  data.length
-		var ChunkSize = 36 + SubChunk2Size
-
-		var str = [
-			"RIFF",//ChunkID,
-			uint32_string(ChunkSize),
-			"WAVE",//ChunkFormat,
-			"fmt ",//SubChunk1ID,
-			uint32_string(SubChunk1Size),
-			uint16_string(AudioFormat),
-			uint16_string(Channels),
-			uint32_string(SampleRate),
-			uint32_string(ByteRate),
-			uint16_string(BlockAlign),
-			uint16_string(BitsPerSample),
-			"data",//SubChunk2ID,
-			uint32_string(SubChunk2Size),
-			arrayBufferToString(data)
-		].join("")
-
-		var t1 = performance.now();
-		var time = (t1 - t0)
-		if (time < min1) min1 = time
-		if (time > max1) max1 = time
-		log("t1:"+ time +", avg:" + (totalTime1 += time)/(++totalTimes1) + ", min" + min1 + ", max" + max1);
-
-		return 'data:audio/wav;base64,' + escape(window.btoa(str));
-	}
-
-	var modulations = [
-		function(i, sampleRate, frequency, x) { return 1 * Math.sin(2 * Math.PI * ((i / sampleRate) * frequency) + x); },
-		function(i, sampleRate, frequency, x) { return 1 * Math.sin(4 * Math.PI * ((i / sampleRate) * frequency) + x); },
-		function(i, sampleRate, frequency, x) { return 1 * Math.sin(8 * Math.PI * ((i / sampleRate) * frequency) + x); },
-		function(i, sampleRate, frequency, x) { return 1 * Math.sin(0.5 * Math.PI * ((i / sampleRate) * frequency) + x); },
-		function(i, sampleRate, frequency, x) { return 1 * Math.sin(0.25 * Math.PI * ((i / sampleRate) * frequency) + x); },
-		function(i, sampleRate, frequency, x) { return 0.5 * Math.sin(2 * Math.PI * ((i / sampleRate) * frequency) + x); },
-		function(i, sampleRate, frequency, x) { return 0.5 * Math.sin(4 * Math.PI * ((i / sampleRate) * frequency) + x); },
-		function(i, sampleRate, frequency, x) { return 0.5 * Math.sin(8 * Math.PI * ((i / sampleRate) * frequency) + x); },
-		function(i, sampleRate, frequency, x) { return 0.5 * Math.sin(0.5 * Math.PI * ((i / sampleRate) * frequency) + x); },
-		function(i, sampleRate, frequency, x) { return 0.5 * Math.sin(0.25 * Math.PI * ((i / sampleRate) * frequency) + x); }
-	]
-	function piano_wave(i, sampleRate, frequency)
-	{
-		//var base = modulations[0];
-		return modulations[1](
-					i,
-					sampleRate,
-					frequency,
-					Math.pow(modulations[0](i, sampleRate, frequency, 0), 2) + (0.75 * modulations[0](i, sampleRate, frequency, 0.25)) + (0.1 * modulations[0](i, sampleRate, frequency, 0.5))
-					)
-	}
-	function piano_16(data, sampleRate, frequency, volume, time, decayEnd)
-	{
-		var i = 0;
-		var j = 0;
-		var attack = 0.002; 
-		var dampen = Math.pow(0.5*Math.log((frequency*volume)/sampleRate),2)
-
-		var attackLen_int = (sampleRate * attack) | 0;
-		var attackLen = (sampleRate*attack)
-		var decayLen = (sampleRate*(time-attack))
-		while(i < attackLen_int) {
-			val = volume * (i/attackLen) * piano_wave(i, sampleRate, frequency)
-			data[j++] = val;
-			data[j++] = val >> 8;
-			++i;
-		}
-		while (i < decayEnd) {
-			val = volume * Math.pow((1-((i-attackLen)/decayLen)),dampen) * piano_wave(i, sampleRate, frequency)
-			data[j++] = val;
-			data[j++] = val >> 8;
-			++i;
-		}
-	}
-	function organ_wave(i, sampleRate, frequency)
-	{
-		var base = modulations[0];
-		return modulations[1](
-					i,
-					sampleRate,
-					frequency,
-					base(i, sampleRate, frequency, 0) + 0.5*base(i, sampleRate, frequency, 0.25) + 0.25*base(i, sampleRate, frequency, 0.5)
-				);
-	}
-	function organ_16(data, sampleRate, frequency, volume, time, decayEnd)
-	{
-		var i = 0;
-		var j = 0;
-		var attack = 0.3
-		var dampen = 1+(frequency * 0.01);
-
-		var attackLen_int = (sampleRate * attack) | 0;
-		var attackLen = (sampleRate*attack)
-		var decayLen = (sampleRate*(time-attack))
-		while(i < attackLen_int) {
-			val = volume * (i/attackLen) * organ_wave(i, sampleRate, frequency);
-
-			data[j++] = val;
-			data[j++] = val >> 8;
-			++i;
-		}
-
-		while (i < decayEnd) {
-			val = volume * Math.pow((1-((i-attackLen)/decayLen)),dampen) * organ_wave(i, sampleRate, frequency);
-
-			data[j++] = val;
-			data[j++] = val >> 8;
-			++i;
-		}
-	}
-	function acoustic_rand_16(data, period, samples, volume)
-	{
-		var i = 0;
-		var j = 0;
-		var p = 0;
-		//var data = new Uint8Array(samples * 2); //16 bit integer
-		var period_int = Math.ceil(period)
-		var valueTable = new Array(period_int)
-		for(i = 0; i < period_int; i++) {
-			var value = volume * (valueTable[i] = (Math.random() > 0.5) ? 1 : -1)
-			data[j++] = value
-			data[j++] = value >> 8
-		}
-		for(; i < samples; i++) {
-			var point = Math.floor(i % period)
-			var next = point + 1;
-			if (next == period_int) {next = 0}
-			var value = volume * (valueTable[point] = (valueTable[point] + valueTable[next]) / 2)
-			data[j++] = value
-			data[j++] = value >> 8
-		}
-		/*
-		var periods = samples/period - 1
-		for(p = 0; p < periods; p++) {
-			for(i = 0; i < period_int; i++) {
-				var next = i + 1;
-				if (next == period_int) {next = 0}
-				var value = volume * (valueTable[i] = (valueTable[i] + valueTable[next]) / 2)
-				data[j++] = value
-				data[j++] = value >> 8
-			}
-		}
-		*/
-		/*
-		for(; i < samples; i++) {
-			var point = i % period_int
-			var next = point + 1;
-			if (next == period_int) {next = 0}
-			var value = volume * (valueTable[point] = (valueTable[point] + valueTable[next]) / 2)
-			data[j++] = value
-			data[j++] = value >> 8
-		}
-		*/
-		//return data;
-	}
-	function edm_16(data, sampleRate, frequency, volume, time, decayEnd)
-	{
-		var i = 0;
-		var j = 0;
-		var attack = 0.002
-		var dampen = 1
-		var attackLen_int = (sampleRate * attack) | 0;
-		var attackLen = (sampleRate*attack)
-		var decayLen = (sampleRate*(time-attack))
-		var wave = function() {
-			var base = modulations[0];
-			//var mod = modulations.slice(0);
-			return modulations[0](
-				i,
-				sampleRate,
-				frequency,
-				modulations[9](
-					i,
-					sampleRate,
-					frequency,
-					modulations[2](
-						i,
-						sampleRate,
-						frequency,
-						Math.pow(base(i, sampleRate, frequency, 0), 3) +
-							Math.pow(base(i, sampleRate, frequency, 0.5), 5) +
-							Math.pow(base(i, sampleRate, frequency, 1), 7)
-					)
-				) +
-					modulations[6](
-						i,
-						sampleRate,
-						frequency,
-						base(i, sampleRate, frequency, 1.75)
-					)
-			);
-		}
-		while(i < attackLen_int) {
-			val = volume * (i/attackLen) * wave();
-
-			data[j++] = val;
-			data[j++] = val >> 8;
-			++i;
-		}
-
-		while (i < decayEnd) {
-			val = volume * Math.pow((1-((i-attackLen)/decayLen)),dampen) * wave();
-
-			data[j++] = val;
-			data[j++] = val >> 8;
-			++i;
-		}
-	}
-	function generateWAV_16(sound, sampleRate, time, frequency, volume)
+	function generateData_16(sound, sampleRate, time, frequency, volume)
 	{
 		var decayEnd = (sampleRate * time) | 0;
 		var data = new Uint8Array(new ArrayBuffer(decayEnd * 2));
@@ -405,7 +54,7 @@
 		return data
 	}
 	function createSoundPlayer(sound, sampleRate, time, frequency, volume) {
-		var data = generateWAV(sound, sampleRate, time, frequency, volume)
+		var data = generateData_16(sound, sampleRate, time, frequency, volume)
 		var src
 		if (base64mode) {
 			src = encodeWAVbase64(1, sampleRate, 16, data)
@@ -450,6 +99,21 @@
 			}
 		}
 	}
+	function displayNote_webaudio(soundplayers, midinote) {
+		var percentageSum = 0;
+		for (var i = 0; i < soundplayers.length; i++)
+		{
+			soundplayer = soundplayers[i]
+			if (soundplayer.playing) percentageSum += 1;
+		}
+		displayNoteState(midinote, percentageSum/noteRepeats)
+	}
+	function createOnEndedHandler_webaudio(soundplayers, midinote) {
+		return function() {
+			this.playing = false;
+			displayNote_webaudio(soundplayers, midinote)
+		}
+	}
 	function createTimeUpdateHandler(soundplayers, midinote) {
 		return function() {
 			var percentageSum = 0;
@@ -461,13 +125,14 @@
 			displayNoteState(midinote, percentageSum/noteRepeats)
 		}
 	}
-	function noteDown(midinote) {
-		var frequency = 440 * Math.pow(2, ( (midinote - 69) / 12) )
+	function getPlayer(midinote, frequency) {
+		//gets a player that least affects sound (one that has been playing for maximum time)
 		var soundplayer;
 		var soundplayers;
 		if (!(midinote < soundplayersstorage.length)) soundplayersstorage[midinote] = []
 		if (!soundplayersstorage[midinote]) soundplayersstorage[midinote] = []
 		soundplayers = soundplayersstorage[midinote]
+
 		var maxTime = -1;
 		var maxTime_soundplayer;
 		for (var i = 0; i < soundplayers.length; i++)
@@ -480,7 +145,7 @@
 			}
 		}
 		soundplayer = maxTime_soundplayer
-		//++i;
+			//create if unavailable
 		if (!soundplayer || (!soundplayersstorage[midinote][i] && (i < noteRepeats))) {
 			soundplayer = createSoundPlayer(soundchoice, sampleRate, time, frequency, 16384)
 			soundplayer.ontimeupdate = createTimeUpdateHandler(soundplayersstorage[midinote], midinote);
@@ -490,12 +155,51 @@
 			soundplayersstorage[midinote].push(soundplayer)
 		} else {
 		}
+		return soundplayer
+	}
+	function getWebAudioPlayer(midinote, frequency) {
+		//gets a player that is not playing (cannot retrieve duration)
+		var soundplayer;
+		var soundplayers;
+		if (!(midinote < soundplayersstorage.length)) soundplayersstorage[midinote] = []
+		if (!soundplayersstorage[midinote]) soundplayersstorage[midinote] = []
+		soundplayers = soundplayersstorage[midinote]
+
+		for (var i = 0; i < soundplayers.length; i++)
+		{
+			if (!soundplayers[i].playing) {
+				soundplayers[i] = webAudio_createPlayer(frequency, time)
+				soundplayers[i].playing = true
+				soundplayers[i].onended = createOnEndedHandler_webaudio(soundplayersstorage[midinote], midinote);
+				soundplayer = soundplayers[i]
+				break;
+			}
+		}
+
+		if (!soundplayer || (!soundplayersstorage[midinote][i] && (i < noteRepeats))) {
+			soundplayer = webAudio_createPlayer(frequency, time)
+			soundplayer.playing = true
+			soundplayer.onended = createOnEndedHandler_webaudio(soundplayersstorage[midinote], midinote);
+			soundplayersstorage[midinote].push(soundplayer)
+		}
+		displayNote_webaudio(soundplayersstorage[midinote], midinote)
+		return soundplayer
+	}
+	function noteDown(midinote) {
+		var frequency = 440 * Math.pow(2, ( (midinote - 69) / 12) )
+
+
+		var soundplayer = getWebAudioPlayer(midinote, frequency)
+		
+		soundplayer.start()
+		/*
 		if (soundplayer.currentTime == soundplayer.duration || soundplayer.currentTime == 0) {
 			//soundplayer.load();
 			soundplayer.play();
 		} else {
 			soundplayer.currentTime = 0;
 		}
+		*/
 	}
 	function noteUp(midinote) {
 		/*
