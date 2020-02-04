@@ -85,11 +85,8 @@
 	function getPlayer(midinote, frequency) {
 		//gets a player that least affects sound (one that has been playing for maximum time)
 		var soundplayer;
-		var soundplayers;
-		if (!(midinote < soundplayersstorage.length)) soundplayersstorage[midinote] = []
-		if (!soundplayersstorage[midinote]) soundplayersstorage[midinote] = []
-		soundplayers = soundplayersstorage[midinote]
-
+		var soundplayers = getSoundPlayers(midinote);
+		
 		var maxTime = -1;
 		var maxTime_soundplayer;
 		for (var i = 0; i < soundplayers.length; i++)
@@ -103,13 +100,13 @@
 		}
 		soundplayer = maxTime_soundplayer
 			//create if unavailable
-		if (!soundplayer || (!soundplayersstorage[midinote][i] && (i < noteRepeats))) {
+		if (!soundplayer || (!soundplayers[i] && (i < noteRepeats))) {
 			soundplayer = createSoundPlayer(soundchoice, sampleRate, time, frequency, 16384)
-			soundplayer.ontimeupdate = createTimeUpdateHandler(soundplayersstorage[midinote], midinote);
+			soundplayer.ontimeupdate = createTimeUpdateHandler(soundplayers, midinote);
 			//soundplayer.onended = createOnEndedHandler(midinote)
 			//soundplayer.onpause = createOnEndedHandler(midinote)
 			//soundplayer.onplay = createOnPlayHandler(midinote)
-			soundplayersstorage[midinote].push(soundplayer)
+			soundplayers.push(soundplayer)
 		} else {
 		}
 		return soundplayer

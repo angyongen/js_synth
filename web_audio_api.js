@@ -55,28 +55,24 @@ function webAudio_createPlayer(sound, frequency, time, volume) {
 	function getWebAudioPlayer(midinote, frequency) {
 		//gets a player that is not playing (cannot retrieve duration)
 		var soundplayer;
-		var soundplayers;
-		if (!(midinote < soundplayersstorage.length)) soundplayersstorage[midinote] = []
-		if (!soundplayersstorage[midinote]) soundplayersstorage[midinote] = []
-		soundplayers = soundplayersstorage[midinote]
-
+		var soundplayers = getSoundPlayers(midinote);
 		for (var i = 0; i < soundplayers.length; i++)
 		{
 			if (!soundplayers[i].playing) {
 				soundplayers[i] = webAudio_createPlayer(soundchoice, frequency, time, 0.5)
 				soundplayers[i].playing = true
-				soundplayers[i].onended = createOnEndedHandler_webaudio(soundplayersstorage[midinote], midinote);
+				soundplayers[i].onended = createOnEndedHandler_webaudio(soundplayers, midinote);
 				soundplayer = soundplayers[i]
 				break;
 			}
 		}
 
-		if (!soundplayer || (!soundplayersstorage[midinote][i] && (i < noteRepeats))) {
+		if (!soundplayer || (!soundplayers[i] && (i < noteRepeats))) {
 			soundplayer = webAudio_createPlayer(soundchoice, frequency, time, 0.5)
 			soundplayer.playing = true
-			soundplayer.onended = createOnEndedHandler_webaudio(soundplayersstorage[midinote], midinote);
-			soundplayersstorage[midinote].push(soundplayer)
+			soundplayer.onended = createOnEndedHandler_webaudio(soundplayers, midinote);
+			soundplayers.push(soundplayer)
 		}
-		displayNote_webaudio(soundplayersstorage[midinote], midinote)
+		displayNote_webaudio(soundplayers, midinote)
 		return soundplayer
 	}

@@ -25,10 +25,10 @@
 		<a href="/">back</a>
 		<div id="soundplayers"></div>
 		<div>
-	    <input type="radio" name="soundchoice" onclick="updateSoundChoice()" value="0">Piano
-	    <input type="radio" name="soundchoice" onclick="updateSoundChoice()" value="1">Organ
-	    <input type="radio" name="soundchoice" onclick="updateSoundChoice()" value="2" checked>Acoustic Guitar
-	    <input type="radio" name="soundchoice" onclick="updateSoundChoice()" value="3">EDM
+	    <input type="radio" name="soundchoice" onclick="soundchoice = 0" value="0">Piano
+	    <input type="radio" name="soundchoice" onclick="soundchoice = 1" value="1">Organ
+	    <input type="radio" name="soundchoice" onclick="soundchoice = 2" value="2" checked>Acoustic Guitar
+	    <input type="radio" name="soundchoice" onclick="soundchoice = 3" value="3">EDM
 	  </div>
 	  <div>
 	    <input type="checkbox" name="inputchoice_vp" onclick="updateInputTypes()" checked>Virtual Piano
@@ -60,7 +60,8 @@
 		document.getElementById('kb_offset_display').textContent = document.form.kb_offset.value
 		document.getElementById('time_display').textContent = document.form.time.value
 		updateInputTypes();
-		updateSoundChoice();
+		soundchoice = parseInt(document.form.soundchoice.value)
+		//updateSoundChoice(parseInt(document.form.soundchoice.value));
 		updateTimeChoice();
 
 		document.form.log.value = ""
