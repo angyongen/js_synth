@@ -40,7 +40,7 @@
 			soundplayer.currentTime = 0;
 		}
 		*/
-		catch(err) {
+		} catch(err) {
 			log(err.message);
 		}
 	}
