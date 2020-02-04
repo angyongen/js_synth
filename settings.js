@@ -18,14 +18,14 @@
 
 	var base64mode = false;
 
-	var soundplayersstorages;// = [[], [], [], []];
-	var soundplayersstorage;
+	var soundplayersstorages = [];// = [[], [], [], []];
+	var soundplayersstorage = [];
 	var soundchoice;
 	var time;
 
 	function updateSoundChoice() {
 		soundchoice = parseInt(document.form.soundchoice.value);
-		if (!soundplayersstorages) soundplayersstorages = []
+		if (!soundplayersstorages[soundchoice]) soundplayersstorages[soundchoice] = []
 		soundplayersstorage = soundplayersstorages[soundchoice]
 	}
 	//var soundplayersplaying = new Uint8Array(128)
