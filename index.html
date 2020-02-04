@@ -54,7 +54,7 @@
 	</form>
 	<script>
 		window.onerror = function myErrorHandler(errorMsg, url, lineNumber) {
-    	alert("Error occured: " + errorMsg + "\non line" + lineNumber);//or any message
+    	alert("Error in " + url + ": " + errorMsg + "\non line" + lineNumber);//or any message
     	return false;
 		}
 		document.getElementById('kb_offset_display').textContent = document.form.kb_offset.value
