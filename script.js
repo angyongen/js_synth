@@ -29,9 +29,8 @@
 	}
 	function noteDown(midinote) {
 		var frequency = 440 * Math.pow(2, ( (midinote - 69) / 12) )
-		try {
-			var soundplayer = getWebAudioPlayer(midinote, frequency)
-			soundplayer.start()
+		var soundplayer = getWebAudioPlayer(midinote, frequency)
+		soundplayer.start()
 		/*
 		if (soundplayer.currentTime == soundplayer.duration || soundplayer.currentTime == 0) {
 			//soundplayer.load();
@@ -40,9 +39,6 @@
 			soundplayer.currentTime = 0;
 		}
 		*/
-		} catch(err) {
-			log(err.message);
-		}
 	}
 	function noteUp(midinote) {
 		/*
