@@ -10,33 +10,58 @@
 <script src=".\html5_audio.js"></script>
 <script src=".\web_audio_api.js"></script>
 <style type="text/css">
-	*{box-sizing: border-box;}
-	form{ font-size:20px}
-	input[type="checkbox"]{width: 3em;	height: 3em;}
-	input[type="radio"]{width: 3em;	height: 3em;}
+	*{box-sizing: border-box; font-family: Calibri;}
+	body{background-color: black; color: white;}
+	form{font-size:20px}
+	iframe{width: 100%}
+	input[type="checkbox"], input[type="radio"] {display:none/*width: 3em;	height: 3em;*/}
+	input[type=radio]+div, input[type=checkbox]+div{
+		display: inline-block;
+		border: 1px solid white;
+		padding: 0.1em 0.2em;
+		margin: 0.1em 0.1em;
+	}
+	label>input[type=radio]:checked+div{
+		background-color: #00a;
+	}
+	label>input[type=checkbox]:checked+div{
+		background-color: #0a0;
+	}
 	input[type="range"]{width: 100%;	height: 2em;}
 	.w,.b {position: relative; display: inline-block; border: 0.2em solid black;}
 	.w { width:3em; height:11em; margin: 0 -0.1em 0 -0.1em;  background: white; z-index:0;}
 	.b { width:2em; height:7em; margin: 0 -1em 4em -1em; background: black; z-index:1;}
+	.settingsblock {display: inline-block; margin: 0 0.5em;}
+	#input_vp {
+		height: 14em; white-space: nowrap;
+		overflow-x: scroll;
+		overflow-y: hidden;
+		margin: 0.5em 0;
+	}
+	textarea{background-color: black; color: white; margin: 0.5em 0;}
 </style>
 </head>
 <body>
 	<form name="form" style="height:100%">  
 		<a href="/">back</a>
-		<div id="soundplayers"></div>
+		<div class="settingsblock" onclick="updateSoundChoice()">
+			<label><input type="radio" name="soundchoice" value="0"><div>Piano</div></label>
+			<label><input type="radio" name="soundchoice" value="1"><div>Organ</div></label>
+			<label><input type="radio" name="soundchoice" value="2" checked><div>Acoustic Guitar</div></label>
+			<label><input type="radio" name="soundchoice" value="3"><div>EDM</div></label>
+		</div>
+		<div class="settingsblock" onclick="updateInputTypes()">
+			<label><input type="checkbox" name="inputchoice_kb"><div>Keyboard</div></label>
+			<label><input type="checkbox" name="inputchoice_vp" checked><div>Virtual Piano</div></label>
+			<label><input type="checkbox" name="inputchoice_sm"><div>Score Maker</div></label>
+		</div>
+		<!--<div id="soundplayers"></div>-->
 		<div>
-	    <input type="radio" name="soundchoice" onclick="updateSoundChoice()" value="0">Piano
-	    <input type="radio" name="soundchoice" onclick="updateSoundChoice()" value="1">Organ
-	    <input type="radio" name="soundchoice" onclick="updateSoundChoice()" value="2" checked>Acoustic Guitar
-	    <input type="radio" name="soundchoice" onclick="updateSoundChoice()" value="3">EDM
-	  </div>
-	  <div>
-	    <input type="checkbox" name="inputchoice_vp" onclick="updateInputTypes()" checked>Virtual Piano
-	    <input type="checkbox" name="inputchoice_kb" onclick="updateInputTypes()">Keyboard
-	  </div>
-    <br>Notes Length = <span id="time_display"></span>
-    <input type="range" min="1" max="10" value="5" class="slider" name="time" oninput="updateTimeChoice()">
+			Notes Length = <span id="time_display"></span>
+			<input type="range" min="1" max="15" value="10" class="slider" name="time" oninput="updateTimeChoice()">
 			
+		</div>
+
     <div id="input_kb">
     	Keyboard Offset = <span id="kb_offset_display"></span>
     	<input type="range" min="21" max="89" value="48" class="slider" name="kb_offset" oninput="document.getElementById('kb_offset_display').textContent = this.value">
@@ -44,11 +69,12 @@
 	    Click here to open up the keyboard for mobile ->
 			<textarea name="input"></textarea>
 		</div>
-		<div id="input_vp" style="font-size:12px">
+		<div id="input_vp" style="font-size:12px;">
 			<!--<input type="range" min="1" max="100" value="50" class="slider" id="vp_scale">-->
 			<br>
 <div id="keys"><div class="w"></div><div class="b"></div><div class="w"></div><!--1--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--2--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--3--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--4--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--5--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--6--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--7--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--8--><div class=w></div></div>
 		</div>
+    <iframe id="input_sm" src="..\js_scoremaker\index.html"></iframe>
     <textarea readonly name="log" style="width:100%; height:10em"></textarea>
 	<sub>Inspired by <a href="https://keithwhor.com/music/">https://keithwhor.com/music/</a></sub>
 	</form>
@@ -59,6 +85,11 @@
 		}
 		document.getElementById('kb_offset_display').textContent = document.form.kb_offset.value
 		document.getElementById('time_display').textContent = document.form.time.value
+		function updateInputTypes() {
+			document.getElementById("input_kb").style.display = document.form.inputchoice_kb.checked?"":"none"
+			document.getElementById("input_vp").style.display = document.form.inputchoice_vp.checked?"":"none"
+			document.getElementById("input_sm").style.display = document.form.inputchoice_sm.checked?"":"none"
+		}
 		updateInputTypes();
 		function updateSoundChoice() {
 			soundchoice = parseInt(document.form.soundchoice.value)

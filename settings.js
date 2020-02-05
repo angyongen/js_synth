@@ -1,4 +1,4 @@
-	var noteRepeats = 3 //the number of duplicate note audio stored
+	var noteRepeats = 5 //the number of duplicate note audio stored
 	var appendToDocument = false //whether or not note audio is appended to the soundplayers div
 	var keyCodeMapping = [81, 50, 87, 51, 69, 82, 53, 84, 54, 89, 55, 85, 73, 57, 79, 48, 80, 219, 61, 221]
 	var sampleRate = 44100

@@ -53,7 +53,3 @@
 		}
 		*/
 	}
-	function updateInputTypes() {
-		document.getElementById("input_kb").style.display = document.form.inputchoice_kb.checked?"":"none"
-		document.getElementById("input_vp").style.display = document.form.inputchoice_vp.checked?"":"none"
-	}
