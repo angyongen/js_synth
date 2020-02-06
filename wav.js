@@ -1,6 +1,6 @@
 
 	function encodeWAVBlob(Channels, SampleRate, BitsPerSample, data) {
-		var t0 = performance.now();
+		//var t0 = performance.now();
 		//var enc = new TextEncoder();
 
 		var uint16_bytes = function(v) {
@@ -41,11 +41,11 @@
 			data
 		], {type: 'audio/wav'})
 
-		var t1 = performance.now();
-		var time = (t1 - t0)
-		if (time < min1) min1 = time
-		if (time > max1) max1 = time
-		log("t1:"+ time +", avg:" + (totalTime1 += time)/(++totalTimes1) + ", min" + min1 + ", max" + max1);
+		//var t1 = performance.now();
+		//var time = (t1 - t0)
+		//if (time < min1) min1 = time
+		//if (time > max1) max1 = time
+		//log("t1:"+ time +", avg:" + (totalTime1 += time)/(++totalTimes1) + ", min" + min1 + ", max" + max1);
 
 		return blob//
 	}

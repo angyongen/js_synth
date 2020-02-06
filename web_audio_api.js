@@ -76,3 +76,7 @@ function webAudio_createPlayer(sound, frequency, time, volume) {
 		displayNote_webaudio(soundplayers, midinote)
 		return soundplayer
 	}
+
+	function startWebAudioPlayer(soundplayer) {
+		soundplayer.start()
+	}

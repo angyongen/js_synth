@@ -27,18 +27,28 @@
 			}
 		}
 	}
-	function noteDown(midinote) {
-		var frequency = 440 * Math.pow(2, ( (midinote - 69) / 12) )
-		var soundplayer = getWebAudioPlayer(midinote, frequency)
-		soundplayer.start()
-		/*
-		if (soundplayer.currentTime == soundplayer.duration || soundplayer.currentTime == 0) {
-			//soundplayer.load();
-			soundplayer.play();
+	function checkSupport_InitialisePlayer() {
+		if (audioCtx) {
+			getPlayer = getWebAudioPlayer
+			startPlayer = startWebAudioPlayer
 		} else {
-			soundplayer.currentTime = 0;
+			getPlayer = getHTML5AudioPlayer
+			startPlayer = startHTML5AudioPlayer
 		}
-		*/
+	}
+	function noteDown(midinote) {
+
+		var t0 = performance.now();
+
+		var frequency = 440 * Math.pow(2, ( (midinote - 69) / 12) )
+		var soundplayer = getPlayer(midinote, frequency)
+		startPlayer(soundplayer)
+
+		var t1 = performance.now();
+		var time = (t1 - t0)
+		if (time < min2) min2 = time
+		if (time > max2) max2 = time
+		log("t2:"+ time +", avg:" + (totalTime2 += time)/(++totalTimes2) + ", min" + min2 + ", max" + max2);
 	}
 	function noteUp(midinote) {
 		/*

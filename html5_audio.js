@@ -14,8 +14,6 @@
 	{
 		var decayEnd = (sampleRate * time) | 0;
 		var data = new Uint8Array(new ArrayBuffer(decayEnd * 2));
-
-		var t0 = performance.now();
 		switch(sound)
 		{
 			case 0: //piano
@@ -50,11 +48,6 @@
 			++i;
 		}
 		*/
-		var t1 = performance.now();
-		var time = (t1 - t0)
-		if (time < min2) min2 = time
-		if (time > max2) max2 = time
-		log("t2:"+ time +", avg:" + (totalTime2 += time)/(++totalTimes2) + ", min" + min2 + ", max" + max2);
 
 		return data
 	}
@@ -68,8 +61,8 @@
 		}
 		var soundplayer = new Audio(src);
 
-		var source = audioCtx.createMediaElementSource(soundplayer);
-		source.connect(audioCtx.destination);
+		//var source = audioCtx.createMediaElementSource(soundplayer);
+		//source.connect(audioCtx.destination);
 
 		soundplayer.setAttribute('type', 'audio/wav');
 		soundplayer.autoplay = false;
@@ -82,7 +75,7 @@
 		//soundplayer.load();
 		return soundplayer;
 	}
-	function getPlayer(midinote, frequency) {
+	function getHTML5AudioPlayer(midinote, frequency) {
 		//gets a player that least affects sound (one that has been playing for maximum time)
 		var soundplayer;
 		var soundplayers = getSoundPlayers(midinote);
@@ -110,4 +103,13 @@
 		} else {
 		}
 		return soundplayer
+	}
+
+	function startHTML5AudioPlayer(soundplayer) {
+		if (soundplayer.currentTime == soundplayer.duration || soundplayer.currentTime == 0) {
+			//soundplayer.load();
+			soundplayer.play();
+		} else {
+			soundplayer.currentTime = 0;
+		}
 	}
