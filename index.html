@@ -3,6 +3,13 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Javascript Synthesizer</title>
+<script>
+	var log = function(e) {alert(e)}
+	window.onerror = function myErrorHandler(errorMsg, url, lineNumber) {
+		log("Error in " + url + ": " + errorMsg + "\non line" + lineNumber);//or any message
+		return false;
+	}
+</script>
 <script src=".\settings.js"></script>
 <script src=".\sounds.js"></script>
 <script src=".\wav.js"></script>
@@ -76,14 +83,11 @@
 <div id="keys"><div class="w"></div><div class="b"></div><div class="w"></div><!--1--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--2--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--3--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--4--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--5--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--6--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--7--><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><div class="b"></div><div class="w"></div><!--8--><div class=w></div></div>
 		</div>
     <iframe id="input_sm" src="..\js_scoremaker\index.html"></iframe>
-    <textarea readonly name="log" style="width:100%; height:10em"></textarea>
-	<sub>Inspired by <a href="https://keithwhor.com/music/">https://keithwhor.com/music/</a></sub>
+    <textarea hidden readonly name="log" style="width:100%; height:8em"></textarea><br>
+		<sub>Inspired by <a href="https://keithwhor.com/music/">https://keithwhor.com/music/</a></sub>
+		<label><input type="checkbox" onclick="document.form.log.hidden = !this.checked"><div>Debug Log</div></label>
 	</form>
 	<script>
-		window.onerror = function myErrorHandler(errorMsg, url, lineNumber) {
-    	alert("Error in " + url + ": " + errorMsg + "\non line" + lineNumber);//or any message
-    	return false;
-		}
 		initialiseVariables()
 		document.getElementById('kb_offset_display').textContent = document.form.kb_offset.value
 		document.getElementById('time_display').textContent = document.form.time.value
