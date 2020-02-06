@@ -94,7 +94,7 @@
 		soundplayer = maxTime_soundplayer
 			//create if unavailable
 		if (!soundplayer || (!soundplayers[i] && (i < noteRepeats))) {
-			soundplayer = createSoundPlayer(soundchoice, sampleRate, time, frequency, 16384)
+			soundplayer = createSoundPlayer(soundchoice, sampleRate, time, frequency, volume * 16384)
 			soundplayer.ontimeupdate = createTimeUpdateHandler(soundplayers, midinote);
 			//soundplayer.onended = createOnEndedHandler(midinote)
 			//soundplayer.onpause = createOnEndedHandler(midinote)

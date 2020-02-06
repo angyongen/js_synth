@@ -3,21 +3,21 @@ var AudioContext = window.AudioContext || window.webkitAudioContext;
 var audioCtx = new AudioContext();
 var audioCtx_destination = audioCtx.destination;
 
-	function displayNote_webaudio(soundplayers, midinote) {
-		var percentageSum = 0;
-		for (var i = 0; i < soundplayers.length; i++)
-		{
-			soundplayer = soundplayers[i]
-			if (soundplayer.playing) percentageSum += 1;
-		}
-		displayNoteState(midinote, percentageSum/noteRepeats)
+function displayNote_webaudio(soundplayers, midinote) {
+	var percentageSum = 0;
+	for (var i = 0; i < soundplayers.length; i++)
+	{
+		soundplayer = soundplayers[i]
+		if (soundplayer.playing) percentageSum += 1;
 	}
-	function createOnEndedHandler_webaudio(soundplayers, midinote) {
-		return function() {
-			this.playing = false;
-			displayNote_webaudio(soundplayers, midinote)
-		}
+	displayNoteState(midinote, percentageSum/noteRepeats)
+}
+function createOnEndedHandler_webaudio(soundplayers, midinote) {
+	return function() {
+		this.playing = false;
+		displayNote_webaudio(soundplayers, midinote)
 	}
+}
 	
 function webAudio_createPlayer(sound, frequency, time, volume) {
 	var myArrayBuffer = audioCtx.createBuffer(2, audioCtx.sampleRate * time, audioCtx.sampleRate);
@@ -52,31 +52,37 @@ function webAudio_createPlayer(sound, frequency, time, volume) {
 	source.connect(audioCtx_destination);
 	return source;
 }
-	function getWebAudioPlayer(midinote, frequency) {
-		//gets a player that is not playing (cannot retrieve duration)
-		var soundplayer;
-		var soundplayers = getSoundPlayers(midinote);
-		for (var i = 0; i < soundplayers.length; i++)
-		{
-			if (!soundplayers[i].playing) {
-				soundplayers[i] = webAudio_createPlayer(soundchoice, frequency, time, 0.5)
-				soundplayers[i].playing = true
-				soundplayers[i].onended = createOnEndedHandler_webaudio(soundplayers, midinote);
-				soundplayer = soundplayers[i]
-				break;
-			}
-		}
 
-		if (!soundplayer || (!soundplayers[i] && (i < noteRepeats))) {
-			soundplayer = webAudio_createPlayer(soundchoice, frequency, time, 0.5)
-			soundplayer.playing = true
-			soundplayer.onended = createOnEndedHandler_webaudio(soundplayers, midinote);
-			soundplayers.push(soundplayer)
+function getWebAudioPlayer(midinote, frequency) {
+	//gets a player that is not playing (cannot retrieve duration)
+	var soundplayer;
+	var soundplayers = getSoundPlayers(midinote);
+	for (var i = 0; i < soundplayers.length; i++)
+	{
+		if (!soundplayers[i].playing) {
+			//soundplayers[i] = webAudio_createPlayer(soundchoice, frequency, time, 0.5)
+			var buffer = soundplayers[i].buffer
+			soundplayers[i] = audioCtx.createBufferSource();
+			soundplayers[i].buffer = buffer;
+			soundplayers[i].connect(audioCtx_destination);
+			soundplayers[i].playing = true
+			soundplayers[i].onended = createOnEndedHandler_webaudio(soundplayers, midinote);
+			soundplayer = soundplayers[i]
+			break;
 		}
-		displayNote_webaudio(soundplayers, midinote)
-		return soundplayer
 	}
 
-	function startWebAudioPlayer(soundplayer) {
-		soundplayer.start()
+	if (!soundplayer || (!soundplayers[i] && (i < noteRepeats))) {
+		soundplayer = webAudio_createPlayer(soundchoice, frequency, time, 0.5)
+		soundplayer.playing = true
+		soundplayer.onended = createOnEndedHandler_webaudio(soundplayers, midinote);
+		soundplayers.push(soundplayer)
 	}
+	displayNote_webaudio(soundplayers, midinote)
+	return soundplayer
+}
+
+function startWebAudioPlayer(soundplayer) {
+	soundplayer.start()
+	if (soundplayer.onplaying) soundplayer.onplaying()
+}
