@@ -55,10 +55,11 @@
 			<label><input type="checkbox" name="inputchoice_vp" checked><div>Virtual Piano</div></label>
 			<label><input type="checkbox" name="inputchoice_sm"><div>Score Maker</div></label>
 		</div>
+			<label><input type="checkbox" name="scrollLock"><div>Scroll Lock (Mobile)</div></label>
 		<!--<div id="soundplayers"></div>-->
 		<div>
 			Notes Length = <span id="time_display"></span>
-			<input type="range" min="1" max="15" value="10" class="slider" name="time" oninput="updateTimeChoice()">
+			<input type="range" min="1" max="10" value="5" class="slider" name="time" oninput="updateTimeChoice()">
 			
 		</div>
 
@@ -127,11 +128,29 @@
 		var keys = document.getElementById("keys").children
 		for (var keyId = 0; keyId < keys.length; keyId++) {
 			keys[keyId].id = keyId;
+			keys[keyId].ondragstart = function() {return false;}
 			keys[keyId].onclick = function(e) {noteDown(parseInt(this.id)+21)}
+			keys[keyId].onmouseenter = function(e) {
+				if(e.buttons == 1) {
+					noteDown(parseInt(this.id)+21)
+				}
+			}
 			keys[keyId].ontouchstart = function(e) {
-				e.preventDefault();
-				noteDown(parseInt(this.id)+21)
+				if (document.form.scrollLock.checked) {
+					e.preventDefault();
+				} else {
+					//noteDown(parseInt(this.id)+21)
+				}
 			};
+			keys[keyId].ontouchmove = function(e) {
+				var touchedElement = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
+				if (document.form.scrollLock.checked) {
+					if (lastTouchElement != touchedElement) {
+						if (touchedElement && touchedElement.id) noteDown(parseInt(touchedElement.id)+21)
+					}
+				}
+				lastTouchElement = touchedElement
+			}
 		}
 	</script>
 </body>

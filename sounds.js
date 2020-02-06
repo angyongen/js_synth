@@ -54,7 +54,7 @@ function sine_synth_modulator(i, modulationParameters) {
 	return Math.sin(modulationParameters.sine_constant * i)
 }
 
-function template_sine_ADSR_synth(data, template, sampleRate, frequency, volume, time) {
+function template_sine_ADSR_synth(data, template, sampleRate, frequency, volume, time, modulationParameters, modulationFunction) {
 	var parameters = {
 		attack_length: template.attack_time * sampleRate,
 		decay_length: template.decay_time * sampleRate,
@@ -64,26 +64,22 @@ function template_sine_ADSR_synth(data, template, sampleRate, frequency, volume,
 		attack_volume: template.attack_volume * volume,
 		sustain_volume: template.sustain_volume * volume,
 
-		modulation_parameters: {
-			sine_constant: Math.PI * frequency / sampleRate
-		}
+		modulation_parameters: modulationParameters
 	}
 
-	ADSR_synth(data, parameters, sine_synth_modulator)
+	ADSR_synth(data, parameters, modulationFunction)
 }
 
-function template_sine_AexpD_synth(data, template, sampleRate, frequency, volume, time) {
+function template_AexpD_synth(data, template, sampleRate, frequency, volume, time, modulationParameters, modulationFunction) {
 	var parameters = {
 		attack_length: template.attack_time * sampleRate,
 		total_samples: time * sampleRate,
 		decay_multiplier: Math.pow(template.decay_constant, 1/sampleRate),
 		attack_volume: template.attack_volume * volume,
-		modulation_parameters: {
-			sine_constant: Math.PI * frequency / sampleRate
-		}
+		modulation_parameters: modulationParameters
 	}
 
-	AexpD_synth(data, parameters, sine_synth_modulator)
+	AexpD_synth(data, parameters, modulationFunction)
 }
 
 	var modulations = [
@@ -131,13 +127,28 @@ function template_sine_AexpD_synth(data, template, sampleRate, frequency, volume
 			++i;
 		}
 	}
+	function piano_wave_modulator(i, modulationParameters)
+	{
+		var sampleRate = modulationParameters.sampleRate
+		var frequency = modulationParameters.frequency
+		//var base = modulations[0];
+		return modulations[1](
+					i,
+					sampleRate,
+					frequency,
+					Math.pow(modulations[0](i, sampleRate, frequency, 0), 2) + (0.75 * modulations[0](i, sampleRate, frequency, 0.25)) + (0.1 * modulations[0](i, sampleRate, frequency, 0.5))
+					)
+	}
 	function piano_float(data, sampleRate, frequency, volume, time, decayEnd)
 	{
-		template_sine_AexpD_synth(data, {
+	template_AexpD_synth(data, {
 			attack_time: 0.002,
 			decay_constant:  0.5,
 			attack_volume: 1
-		}, sampleRate, frequency, volume, time)
+		}, sampleRate, frequency, volume, time, {
+		sampleRate: sampleRate,
+		frequency: frequency
+		}, piano_wave_modulator)
 		/*
 		var i = 0;
 		var j = 0;
@@ -319,4 +330,15 @@ function template_sine_AexpD_synth(data, template, sampleRate, frequency, volume
 			data[j++] = val >> 8;
 			++i;
 		}
+	}
+
+	function pad_float(data, sampleRate, frequency, volume, time) {
+
+	template_AexpD_synth(data, {
+			attack_time: 0.002,
+			decay_constant:  0.5,
+			attack_volume: 1
+		}, sampleRate, frequency, volume, time, {
+		sine_constant: Math.PI * frequency / sampleRate
+		}, sine_synth_modulator)
 	}

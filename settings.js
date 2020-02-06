@@ -10,6 +10,9 @@ var getPlayer, startPlayer
 
 var time
 
+var scrollLock
+
+var lastTouchElement;
 function initialiseVariables() {
 	noteRepeats = 5 //the number of duplicate note audio stored
 	appendToDocument = false //whether or not note audio is appended to the soundplayers div

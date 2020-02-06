@@ -73,7 +73,7 @@ function getWebAudioPlayer(midinote, frequency) {
 	}
 
 	if (!soundplayer || (!soundplayers[i] && (i < noteRepeats))) {
-		soundplayer = webAudio_createPlayer(soundchoice, frequency, time, 0.5)
+		soundplayer = webAudio_createPlayer(soundchoice, frequency, time, volume)
 		soundplayer.playing = true
 		soundplayer.onended = createOnEndedHandler_webaudio(soundplayers, midinote);
 		soundplayers.push(soundplayer)
