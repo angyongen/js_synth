@@ -62,17 +62,9 @@ function noteDown(midinote) {
 }
 
 function noteUp(midinote) {
-	/*
 	if (!sustain) {
-		var soundchoice = parseInt(document.form.soundchoice.value);
-		var soundplayers = soundplayersstorage[midinote]
-		for (var i = 0; i < soundplayers.length; i++)
-		{
-			var soundplayer = soundplayers[i]
-			setTimeout(function() {soundplayer.pause()}, 10);
-		}
+		stopAll(midinote)
 	}
-	*/
 }
 
 
@@ -106,10 +98,16 @@ var keys = document.getElementById("keys").children
 for (var keyId = 0; keyId < keys.length; keyId++) {
 	keys[keyId].id = keyId;
 	keys[keyId].ondragstart = function() {return false;}
-	keys[keyId].onclick = function(e) {noteDown(parseInt(this.id)+21)}
+	keys[keyId].onmousedown = function(e) {noteDown(parseInt(this.id)+21)}
+	keys[keyId].onmouseup = function(e) {noteUp(parseInt(this.id)+21)}
 	keys[keyId].onmouseenter = function(e) {
 		if(e.buttons == 1) {
 			noteDown(parseInt(this.id)+21)
+		}
+	}
+	keys[keyId].onmouseleave = function(e) {
+		if(e.buttons == 1) {
+			noteUp(parseInt(this.id)+21)
 		}
 	}
 	keys[keyId].ontouchstart = function(e) {
@@ -126,6 +124,7 @@ for (var keyId = 0; keyId < keys.length; keyId++) {
 		if (document.form.scrollLock.checked) {
 			if (lastTouchElement != touchedElement) {
 				if (touchedElement && touchedElement.id) noteDown(parseInt(touchedElement.id)+21)
+				if (lastTouchElement && lastTouchElement.id) noteUp(parseInt(lastTouchElement.id)+21)
 			}
 		}
 		lastTouchElement = touchedElement

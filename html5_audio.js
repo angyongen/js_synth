@@ -113,3 +113,13 @@
 			soundplayer.currentTime = 0;
 		}
 	}
+
+	function stopAllHTML5AudioPlayer(midinote) {
+		var soundplayers = getSoundPlayers(midinote);
+		for (var i = 0; i < soundplayers.length; i++)
+		{
+			var soundplayer = soundplayers[i]
+			soundplayer.pause()
+			//setTimeout(function() {soundplayer.pause()}, 10);
+		}
+	}

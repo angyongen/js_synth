@@ -12,6 +12,8 @@ var time
 
 var scrollLock
 
+var sustain
+
 var lastTouchElement;
 function initialiseVariables() {
 	noteRepeats = 5 //the number of duplicate note audio stored
@@ -33,14 +35,18 @@ function initialiseVariables() {
 
 	base64mode = false
 
+	sustain = false
+
 	soundplayersstorages = []// = [[], [], [], []];
 
 	if (audioCtx) {
 		getPlayer = getWebAudioPlayer
 		startPlayer = startWebAudioPlayer
+		stopAll = stopAllWebAudioPlayer
 	} else {
 		getPlayer = getHTML5AudioPlayer
 		startPlayer = startHTML5AudioPlayer
+		stopAllPlayer = stopAllHTML5AudioPlayer
 	}
 }
 

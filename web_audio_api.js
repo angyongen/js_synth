@@ -86,3 +86,11 @@ function startWebAudioPlayer(soundplayer) {
 	soundplayer.start()
 	if (soundplayer.onplaying) soundplayer.onplaying()
 }
+
+function stopAllWebAudioPlayer(midinote) {
+	var soundplayers = getSoundPlayers(midinote);
+	for (var i = 0; i < soundplayers.length; i++)
+	{
+		soundplayers[i].stop()
+	}
+}
