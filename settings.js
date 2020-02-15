@@ -10,11 +10,13 @@ var getPlayer, startPlayer
 
 var time
 
-var scrollLock
-
-var sustain
-
 var lastTouchElement;
+var lastTouchedKeys;
+
+var AudioContext = window.AudioContext || window.webkitAudioContext;
+var audioCtx = new AudioContext();
+var audioCtx_destination// = audioCtx.destination;
+
 function initialiseVariables() {
 	noteRepeats = 5 //the number of duplicate note audio stored
 	appendToDocument = false //whether or not note audio is appended to the soundplayers div
@@ -35,18 +37,19 @@ function initialiseVariables() {
 
 	base64mode = false
 
-	sustain = false
-
 	soundplayersstorages = []// = [[], [], [], []];
 
+	lastTouchedKeys = []
+
 	if (audioCtx) {
+		audioCtx_destination = audioCtx.destination
 		getPlayer = getWebAudioPlayer
 		startPlayer = startWebAudioPlayer
 		stopAll = stopAllWebAudioPlayer
 	} else {
 		getPlayer = getHTML5AudioPlayer
 		startPlayer = startHTML5AudioPlayer
-		stopAllPlayer = stopAllHTML5AudioPlayer
+		stopAll = stopAllHTML5AudioPlayer
 	}
 }
 

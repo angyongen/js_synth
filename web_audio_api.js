@@ -1,8 +1,3 @@
-
-var AudioContext = window.AudioContext || window.webkitAudioContext;
-var audioCtx = new AudioContext();
-var audioCtx_destination = audioCtx.destination;
-
 function displayNote_webaudio(soundplayers, midinote) {
 	var percentageSum = 0;
 	for (var i = 0; i < soundplayers.length; i++)
@@ -49,7 +44,6 @@ function webAudio_createPlayer(sound, frequency, time, volume) {
 
 	// set the buffer in the AudioBufferSourceNode
 	source.buffer = myArrayBuffer;
-	source.connect(audioCtx_destination);
 	return source;
 }
 
@@ -64,7 +58,10 @@ function getWebAudioPlayer(midinote, frequency) {
 			var buffer = soundplayers[i].buffer
 			soundplayers[i] = audioCtx.createBufferSource();
 			soundplayers[i].buffer = buffer;
-			soundplayers[i].connect(audioCtx_destination);
+
+			soundplayers[i].gainNode = audioCtx.createGain();
+			soundplayers[i].connect(soundplayers[i].gainNode);
+			soundplayers[i].gainNode.connect(audioCtx_destination);
 			soundplayers[i].playing = true
 			soundplayers[i].onended = createOnEndedHandler_webaudio(soundplayers, midinote);
 			soundplayer = soundplayers[i]
@@ -74,6 +71,10 @@ function getWebAudioPlayer(midinote, frequency) {
 
 	if (!soundplayer || (!soundplayers[i] && (i < noteRepeats))) {
 		soundplayer = webAudio_createPlayer(soundchoice, frequency, time, volume)
+
+		soundplayer.gainNode = audioCtx.createGain();
+		soundplayer.connect(soundplayer.gainNode);
+		soundplayer.gainNode.connect(audioCtx_destination);
 		soundplayer.playing = true
 		soundplayer.onended = createOnEndedHandler_webaudio(soundplayers, midinote);
 		soundplayers.push(soundplayer)
@@ -82,9 +83,10 @@ function getWebAudioPlayer(midinote, frequency) {
 	return soundplayer
 }
 
-function startWebAudioPlayer(soundplayer) {
+function startWebAudioPlayer(soundplayer, volume) {
 	soundplayer.start()
 	if (soundplayer.onplaying) soundplayer.onplaying()
+	soundplayer.gainNode.gain.setValueAtTime(volume, audioCtx.currentTime);
 }
 
 function stopAllWebAudioPlayer(midinote) {

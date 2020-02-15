@@ -263,7 +263,7 @@ function template_AexpD_synth(data, template, sampleRate, frequency, volume, tim
 		var period_int = Math.ceil(period)
 		var valueTable = new Array(period_int)
 		for(i = 0; i < period_int; i++) {
-			var value = volume * (valueTable[i] = (Math.random() > 0.5) ? 1 : -1)
+			var value = volume * (valueTable[i] = Math.random()*2-1)//(i>period_int/2)?1:-1)//(Math.random() > 0.5) ? 1 : -1)
 			data[j++] = value
 		}
 		for(; i < samples; i++) {

@@ -105,13 +105,14 @@
 		return soundplayer
 	}
 
-	function startHTML5AudioPlayer(soundplayer) {
+	function startHTML5AudioPlayer(soundplayer, volume) {
 		if (soundplayer.currentTime == soundplayer.duration || soundplayer.currentTime == 0) {
 			//soundplayer.load();
 			soundplayer.play();
 		} else {
 			soundplayer.currentTime = 0;
 		}
+		soundplayer.volume = volume
 	}
 
 	function stopAllHTML5AudioPlayer(midinote) {
@@ -119,7 +120,9 @@
 		for (var i = 0; i < soundplayers.length; i++)
 		{
 			var soundplayer = soundplayers[i]
+			
 			soundplayer.pause()
+			soundplayer.currentTime = 0;
 			//setTimeout(function() {soundplayer.pause()}, 10);
 		}
 	}
