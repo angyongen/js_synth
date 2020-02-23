@@ -64,8 +64,10 @@
 			<label><input type="checkbox" name="inputchoice_vp" checked><div>Virtual Piano</div></label>
 			<label><input type="checkbox" name="inputchoice_sm"><div>Score Maker</div></label>
 		</div>
-			<label><input type="checkbox" name="scrollLock"><div>Scroll Lock (Mobile)</div></label>
-			<label><input type="checkbox" name="sustain" onclick="if(!this.checked)allKeysUp()"><div>Sustain/Damper</div></label>
+		<label><input type="checkbox" name="scrollLock"><div>Scroll Lock (Mobile)</div></label>
+		<label><input type="checkbox" name="sustain" onclick="if(!this.checked)allKeysUp()"><div>Sustain/Damper</div></label>
+		<label><button onclick="document.getElementById('input_sm').contentWindow.playNotes(1000,noteDown,noteUp)"><div>Play from score</div></button></label>
+		
 		<!--<div id="soundplayers"></div>-->
 		<div>
 			Notes Length = <span id="time_display"></span>
