@@ -23,7 +23,7 @@ function initialiseVariables() {
 	keyCodeMapping = [81, 50, 87, 51, 69, 82, 53, 84, 54, 89, 55, 85, 73, 57, 79, 48, 80, 219, 61, 221]
 	sampleRate = 44100
 
-	volume = 0.5
+	volume = 0.25
 
 	totalTime1 = 0
 	totalTimes1 = 0
