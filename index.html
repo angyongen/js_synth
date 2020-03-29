@@ -21,16 +21,16 @@
 	form{font-size:19px}
 	iframe, textarea{width: 100%; height:8em;}
 	input[type="checkbox"], input[type="radio"] {display:none/*width: 3em;	height: 3em;*/}
-	input[type=radio]+div, input[type=checkbox]+div{
+	input[type=radio]+span, input[type=checkbox]+span{
 		display: inline-block;
 		border: 1px solid white;
 		padding: 0.1em 0.2em;
 		margin: 0.1em 0.1em;
 	}
-	label>input[type=radio]:checked+div{
+	label>input[type=radio]:checked+span{
 		background-color: #00a;
 	}
-	label>input[type=checkbox]:checked+div{
+	label>input[type=checkbox]:checked+span{
 		background-color: #0a0;
 	}
 	input[type="range"]{width: 100%;	height: 2em;}
@@ -54,19 +54,19 @@
 	<form name="form" style="height:100%">  
 		<a href="/">back</a>
 		<div class="settingsblock" onclick="updateSoundChoice()">
-			<label><input type="radio" name="soundchoice" value="0"><div>Piano</div></label>
-			<label><input type="radio" name="soundchoice" value="1"><div>Organ</div></label>
-			<label><input type="radio" name="soundchoice" value="2" checked><div>Acoustic Guitar</div></label>
-			<label><input type="radio" name="soundchoice" value="3"><div>EDM</div></label>
+			<label><input type="radio" name="soundchoice" value="0"><span>Piano</span></label>
+			<label><input type="radio" name="soundchoice" value="1"><span>Organ</span></label>
+			<label><input type="radio" name="soundchoice" value="2" checked><span>Acoustic Guitar</span></label>
+			<label><input type="radio" name="soundchoice" value="3"><span>EDM</span></label>
 		</div>
 		<div class="settingsblock" onclick="updateInputTypes()">
-			<label><input type="checkbox" name="inputchoice_kb"><div>Keyboard</div></label>
-			<label><input type="checkbox" name="inputchoice_vp" checked><div>Virtual Piano</div></label>
-			<label><input type="checkbox" name="inputchoice_sm"><div>Score Maker</div></label>
+			<label><input type="checkbox" name="inputchoice_kb"><span>Keyboard</span></label>
+			<label><input type="checkbox" name="inputchoice_vp" checked><span>Virtual Piano</span></label>
+			<label><input type="checkbox" name="inputchoice_sm"><span>Score Maker</span></label>
 		</div>
-		<label><input type="checkbox" name="scrollLock"><div>Scroll Lock (Mobile)</div></label>
-		<label><input type="checkbox" name="sustain" onclick="if(!this.checked)allKeysUp()"><div>Sustain/Damper</div></label>
-		<label><input type="checkbox" name="playScore" onclick="if (this.checked) document.getElementById('input_sm').contentWindow.playNotes(60000/prompt('enter bpm'),noteDown,noteUp)"><div>Play from score</div></input></label>
+		<label><input type="checkbox" name="scrollLock"><span>Scroll Lock (Mobile)</span></label>
+		<label><input type="checkbox" name="sustain" onclick="if(!this.checked)allKeysUp()"><span>Sustain/Damper</span></label>
+		<label><input type="checkbox" name="playScore" onclick="if (this.checked) document.getElementById('input_sm').contentWindow.playNotes(60000/prompt('enter bpm'),noteDown,noteUp)"><span>Play from score</span></input></label>
 		
 		<!--<div id="soundplayers"></div>-->
 		<div>
@@ -90,8 +90,8 @@
     <iframe id="input_sm" src="..\js_scoremaker\index.html"></iframe>
     <textarea hidden readonly name="log"></textarea><br>
 		<sub>Inspired by <a href="https://keithwhor.com/music/">https://keithwhor.com/music/</a></sub>
-		<label><input type="checkbox" onclick="document.form.log.hidden = !this.checked"><div>Debug Log</div></label>
-		<label><input type="checkbox"><div>Fine volume control</div></label>
+		<label><input type="checkbox" onclick="document.form.log.hidden = !this.checked"><span>Debug Log</span></label>
+		<label><input type="checkbox"><span>Fine volume control</span></label>
 	</form>
 		<div class="w" id="dwt"><div class="dw"  style="height:50%"></div></div>
 		<script type="text/javascript">
