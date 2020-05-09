@@ -1,4 +1,5 @@
-var noteRepeats, appendToDocument, keyCodeMapping, sampleRate, volume
+var noteRepeats, appendToDocument, sampleRate, volume
+var whiteKeyCodeMappingString, blackKeyCodeMappingString, blackWhiteMappingString
 var totalTime1, totalTimes1, min1, max1
 var totalTime2, totalTimes2, min2, max2
 
@@ -20,7 +21,11 @@ var audioCtx_destination// = audioCtx.destination;
 function initialiseVariables() {
 	noteRepeats = 5 //the number of duplicate note audio stored
 	appendToDocument = false //whether or not note audio is appended to the soundplayers div
-	keyCodeMapping = [81, 50, 87, 51, 69, 82, 53, 84, 54, 89, 55, 85, 73, 57, 79, 48, 80, 219, 61, 221]
+
+	blackWhiteMappings =   "wbwbwwbwbwbwwbwbwwbwbwbw"
+	blackKeyCodeMappings = "1234567890-="
+	whiteKeyCodeMappings = ["Tab","q","w","e","r","t","y","u","i","o","p","[","]","\\"]
+
 	sampleRate = 44100
 
 	volume = 0.25

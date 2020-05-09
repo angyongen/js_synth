@@ -20,10 +20,10 @@ updateInputTypes();
 updateSoundChoice();
 updateTimeChoice();
 
-function displayNoteState(midinote, percentage) {
+function displayNoteState(midinote, percentage) { //percentage is 0 to 1
 	if (!audioCtx || audioCtx.state == "running") {
 		var keys = document.getElementById("keys").children
-		var keyId = midinote - 21
+		var keyId = noteToId(midinote)
 		if (keyId >= 0 && keyId < keys.length) {
 			if (percentage == 0) {
 				keys[keyId].style.background = ""
@@ -87,6 +87,9 @@ function isKey(element) {
 function idToNote(id) {
 	return parseInt(id)+21
 }
+function noteToId(note) {
+	return note-21
+}
 
 function getTouchedKeys(touches) {
 	var result = []
@@ -97,33 +100,71 @@ function getTouchedKeys(touches) {
 	return result
 }
 
+function keyEvent(key, eventFunction) {
+	document.form.kb_offset.value
+	var ukey = key.toLowerCase()
+	var wkey = whiteKeyCodeMappings.indexOf(key)
+	var bkey = blackKeyCodeMappings.indexOf(key)
+	if (wkey == -1 && bkey == -1) return;
+	//get offset
+	var wkeyOffset = parseInt(document.form.kb_offset.value)
+	var bwmappingLength = blackWhiteMappings.length
+	var noOffsetWhiteKeys = []
+	for (var i = 0; i < bwmappingLength; i++) {
+		var noOffset_keyType = blackWhiteMappings[i]
+		if (noOffset_keyType == "w") noOffsetWhiteKeys.push(i)
+	}
+	var wkeys_in_group = noOffsetWhiteKeys.length//whiteKeyOffsets.length
+	//var bkeys_in_group = blackKeyOffsets.length
+	var grouplength = blackWhiteMappings.length//wkeys_in_group + bkeys_in_group
+	var groupOffset = wkeyOffset % wkeys_in_group
+	var groupNumber = (wkeyOffset-groupOffset) / wkeys_in_group
+	//firstwkeyInGroup = 
+	midiOffset = grouplength * groupNumber + noOffsetWhiteKeys[groupOffset]
+
+	var whiteKeyOffsets = []
+	var blackKeyOffsets = []
+	var lastKeyType = "";
+	for (var i = 0; i < bwmappingLength; i++) {
+		var keyType = blackWhiteMappings[(i+midiOffset)%bwmappingLength]
+		switch (keyType) {
+			case "w":
+			if (lastKeyType == keyType) blackKeyOffsets.push(-1)
+			whiteKeyOffsets.push(i)
+			break;
+			case "b":
+			if (lastKeyType == keyType) whiteKeyOffsets.push(-1)
+			blackKeyOffsets.push(i)
+			break;
+		}
+		lastKeyType = keyType;
+	}
+	if (wkey != -1) {
+		var keyoffset = whiteKeyOffsets[wkey]
+		if (keyoffset != -1) eventFunction(midiOffset + keyoffset)
+	}
+	if (bkey != -1) {
+		var keyoffset = blackKeyOffsets[bkey]
+		if (keyoffset != -1) eventFunction(midiOffset + keyoffset)
+	}
+	//switch(blackWhiteMappingString
+		//var midinote =  + keyId
+		//eventFunction(midinote)
+}
+
 document.form.log.value = ""
 document.form.input.oninput = function(e) {
 	if (this.value) {
-		var keyId = 'AWSEDFTGYHJIKL'.indexOf(this.value[this.value.length - 1].toUpperCase())
+		keyEvent(this.value[this.value.length - 1], noteDown)
 		this.value='';
-		var midinote = parseInt(document.form.kb_offset.value) + keyId
-		noteDown(midinote)
 	}
 }
 document.body.onkeydown = function (event) {
 	event.preventDefault();
-	if (document.form.inputchoice_kb.checked) {
-		var keyId = keyCodeMapping.indexOf(event.keyCode)
-		if (keyId != -1) {
-			var midinote = parseInt(document.form.kb_offset.value) + keyId
-			noteDown(midinote)
-		}
-	}
+	if (document.form.inputchoice_kb.checked) keyEvent(event.key, noteDown)
 }
 document.body.onkeyup = function (event) {
-	if (document.form.inputchoice_kb.checked) {
-		var keyId = keyCodeMapping.indexOf(event.keyCode)
-		if (keyId != -1) {
-			var midinote = parseInt(document.form.kb_offset.value) + keyId
-			noteUp(midinote)
-		}
-	}
+	if (document.form.inputchoice_kb.checked) keyEvent(event.key, noteUp)
 }
 var keyContainer = document.getElementById("keys")
 keyContainer.ontouchstart = function(e) {
