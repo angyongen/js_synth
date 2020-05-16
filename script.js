@@ -100,7 +100,7 @@ function getTouchedKeys(touches) {
 	return result
 }
 
-function keyEvent(key, eventFunction) {
+function noteKeyEvent(key, eventFunction) {
 	document.form.kb_offset.value
 	var ukey = key.toLowerCase()
 	var wkey = whiteKeyCodeMappings.indexOf(key)
@@ -152,19 +152,29 @@ function keyEvent(key, eventFunction) {
 		//eventFunction(midinote)
 }
 
+function genericKeyEvent(key, noteFunction) {
+	switch (key) {
+		case sustainKeyCode:
+		document.form.sustain.click()
+		break;
+		default:
+		noteKeyEvent(key, noteFunction)
+	}
+}
+
 document.form.log.value = ""
 document.form.input.oninput = function(e) {
 	if (this.value) {
-		keyEvent(this.value[this.value.length - 1], noteDown)
+		genericKeyEvent(this.value[this.value.length - 1], noteDown)
 		this.value='';
 	}
 }
 document.body.onkeydown = function (event) {
 	event.preventDefault();
-	if (document.form.inputchoice_kb.checked) keyEvent(event.key, noteDown)
+	if (document.form.inputchoice_kb.checked) genericKeyEvent(event.key, noteDown)
 }
 document.body.onkeyup = function (event) {
-	if (document.form.inputchoice_kb.checked) keyEvent(event.key, noteUp)
+	if (document.form.inputchoice_kb.checked) genericKeyEvent(event.key, noteUp)
 }
 var keyContainer = document.getElementById("keys")
 keyContainer.ontouchstart = function(e) {

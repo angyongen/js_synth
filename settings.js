@@ -25,6 +25,7 @@ function initialiseVariables() {
 	blackWhiteMappings =   "wbwbwwbwbwbwwbwbwwbwbwbw"
 	blackKeyCodeMappings = "1234567890-="
 	whiteKeyCodeMappings = ["Tab","q","w","e","r","t","y","u","i","o","p","[","]","\\"]
+	sustainKeyCode = " "
 
 	sampleRate = 44100
 
