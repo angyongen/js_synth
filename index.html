@@ -15,6 +15,7 @@
 <script src="./wav.js"></script>
 <script src="./html5_audio.js"></script>
 <script src="./web_audio_api.js"></script>
+<script src="./spectrogram.js"></script>
 <style>
 	*{box-sizing: border-box; font-family: Calibri;}
 	body{background-color: black; color: white;}
@@ -64,6 +65,7 @@
 			<label><input type="checkbox" name="inputchoice_vp" checked><span>Virtual Piano</span></label>
 			<label><input type="checkbox" name="inputchoice_sm"><span>Score Maker</span></label>
 		</div>
+		<label><input type="checkbox" name="spectrogram_enabled" onclick="spectrogramEnabledChanged()"><span>Spectrogram Highlighting</span></label>
 		<label><input type="checkbox" name="scrollLock"><span>Scroll Lock (Mobile)</span></label>
 		<label><input type="checkbox" name="sustain" onclick="if(!this.checked)allKeysUp()"><span>Sustain/Damper</span></label>
 		<label><input type="checkbox" name="playScore" onclick="if (this.checked) document.getElementById('input_sm').contentWindow.playNotes(60000/prompt('enter bpm'),noteDown,noteUp)"><span>Play from score</span></label>
@@ -80,6 +82,8 @@
     	<!--<input type="range" min="21" max="89" value="48" class="slider" name="kb_offset" oninput="document.getElementById('kb_offset_display').textContent = this.value">-->
     	<input type="range" min="12" max="51" value="30" class="slider" name="kb_offset" oninput="document.getElementById('kb_offset_display').textContent = this.value">
     	<br>
+    	Transpose = <span id="kb_transpose_display"></span>
+    	<input type="range" min="-12" max="12" value="0" class="slider" name="kb_transpose" oninput="document.getElementById('kb_transpose_display').textContent = this.value">
 	    Click here to open up the keyboard for mobile ->
 			<textarea name="input"></textarea>
 		</div>

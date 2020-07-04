@@ -211,6 +211,7 @@ function template_AexpD_synth(data, template, sampleRate, frequency, volume, tim
 	}
 	function acoustic_rand_16(data, period, samples, volume)
 	{
+		period += 5;
 		var i = 0;
 		var j = 0;
 		var p = 0;
@@ -257,6 +258,7 @@ function template_AexpD_synth(data, template, sampleRate, frequency, volume, tim
 
 	function acoustic_rand_float(data, period, samples, volume)
 	{
+		period += 5;
 		var i = 0;
 		var j = 0;
 		var p = 0;

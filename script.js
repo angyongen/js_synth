@@ -15,6 +15,7 @@ function updateSoundChoice() {
 
 initialiseVariables()
 document.getElementById('kb_offset_display').textContent = document.form.kb_offset.value
+document.getElementById('kb_transpose_display').textContent = document.form.kb_transpose.value
 document.getElementById('time_display').textContent = document.form.time.value
 updateInputTypes();
 updateSoundChoice();
@@ -45,10 +46,14 @@ function displayNoteState(midinote, percentage) { //percentage is 0 to 1
 	}
 }
 
+function midinote_to_frequency(midinote) {
+	return 442 * Math.pow(2, ( (midinote - 69) / 12) )
+}
+
 function noteDown(midinote, volume) {
 	var t0 = performance.now();
 
-	var frequency = 440 * Math.pow(2, ( (midinote - 69) / 12) )
+	var frequency = midinote_to_frequency(midinote)
 
 	var soundplayer = getPlayer(midinote, frequency, volume)
 	soundplayer._debugStartTime = t0;
@@ -100,14 +105,12 @@ function getTouchedKeys(touches) {
 	return result
 }
 
-function noteKeyEvent(key, eventFunction) {
-	document.form.kb_offset.value
+function noteKeyEvent(key, eventFunction, wkeyOffset, transpose) {
 	var ukey = key.toLowerCase()
 	var wkey = whiteKeyCodeMappings.indexOf(key)
 	var bkey = blackKeyCodeMappings.indexOf(key)
 	if (wkey == -1 && bkey == -1) return;
 	//get offset
-	var wkeyOffset = parseInt(document.form.kb_offset.value)
 	var bwmappingLength = blackWhiteMappings.length
 	var noOffsetWhiteKeys = []
 	for (var i = 0; i < bwmappingLength; i++) {
@@ -139,13 +142,14 @@ function noteKeyEvent(key, eventFunction) {
 		}
 		lastKeyType = keyType;
 	}
+
 	if (wkey != -1) {
 		var keyoffset = whiteKeyOffsets[wkey]
-		if (keyoffset != -1) eventFunction(midiOffset + keyoffset)
+		if (keyoffset != -1) eventFunction(midiOffset + keyoffset + transpose)
 	}
 	if (bkey != -1) {
 		var keyoffset = blackKeyOffsets[bkey]
-		if (keyoffset != -1) eventFunction(midiOffset + keyoffset)
+		if (keyoffset != -1) eventFunction(midiOffset + keyoffset + transpose)
 	}
 	//switch(blackWhiteMappingString
 		//var midinote =  + keyId
@@ -158,7 +162,7 @@ function genericKeyEvent(key, noteFunction) {
 		document.form.sustain.click()
 		break;
 		default:
-		noteKeyEvent(key, noteFunction)
+		noteKeyEvent(key, noteFunction, parseInt(document.form.kb_offset.value), parseInt(document.form.kb_transpose.value))
 	}
 }
 
@@ -169,11 +173,17 @@ document.form.input.oninput = function(e) {
 		this.value='';
 	}
 }
+var pressed = {}
+var allowMultipleKeyDown = false
 document.body.onkeydown = function (event) {
 	event.preventDefault();
-	if (document.form.inputchoice_kb.checked) genericKeyEvent(event.key, noteDown)
+	if (!pressed[event.key] || allowMultipleKeyDown) {
+		pressed[event.key] = true
+		if (document.form.inputchoice_kb.checked) genericKeyEvent(event.key, noteDown)
+	}
 }
 document.body.onkeyup = function (event) {
+	pressed[event.key] = false
 	if (document.form.inputchoice_kb.checked) genericKeyEvent(event.key, noteUp)
 }
 var keyContainer = document.getElementById("keys")
@@ -238,4 +248,45 @@ for (var keyId = 0; keyId < keys.length; keyId++) {
 	keys[keyId].ontouchmove = function(e) {
 		updateTouchedKeys(getTouchedKeys(e.touches))
 	}
+}
+
+var analyser = create_analyser_builtin(4096, null, 1, 0)
+
+function updateSpectrogram() {
+
+	var spectrogram = getSpectrogramBuffer(analyser)
+
+	for (var keyId = 0; keyId < keys.length; keyId++) {
+		var midinote = idToNote(keyId)
+		var frequency = midinote_to_frequency(midinote)
+		var closestBin = getClosestBin(frequency)
+		var percentage = spectrogram[closestBin]
+		switch (keys[keyId].className) {
+			case "w":
+				intensity = Math.round(255-percentage)
+				keys[keyId].style.background = "rgb(255,"+intensity+","+intensity+")"
+				break;
+			case "b":
+				intensity = Math.round(percentage)
+				keys[keyId].style.background = "rgb("+intensity+",0,0)"
+				break;
+		}
+	}
+}
+
+
+function startSpectrogram() {
+	var oldDestination = audioCtx_destination
+	audioCtx_destination = analyser
+	analyser.connect(oldDestination)
+	animatedSpectrogram()
+}
+var spectrogramEnabled = document.form.spectrogram_enabled.checked
+function spectrogramEnabledChanged() {
+	spectrogramEnabled = document.form.spectrogram_enabled.checked
+	if (spectrogramEnabled) startSpectrogram()
+}
+function animatedSpectrogram() {
+      if (spectrogramEnabled) requestAnimationFrame(animatedSpectrogram)
+      updateSpectrogram()
 }
