@@ -209,9 +209,10 @@ function template_AexpD_synth(data, template, sampleRate, frequency, volume, tim
 	function organ_float(data, sampleRate, frequency, volume, time, decayEnd)
 	{
 	}
+	const acoustic_calibration = 1.1;
 	function acoustic_rand_16(data, period, samples, volume)
 	{
-		period += 5;
+		period *= acoustic_calibration;
 		var i = 0;
 		var j = 0;
 		var p = 0;
@@ -258,7 +259,7 @@ function template_AexpD_synth(data, template, sampleRate, frequency, volume, tim
 
 	function acoustic_rand_float(data, period, samples, volume)
 	{
-		period += 5;
+		period *= acoustic_calibration;
 		var i = 0;
 		var j = 0;
 		var p = 0;
