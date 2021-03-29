@@ -23,14 +23,13 @@
 		//var SubChunk2ID = enc.encode("data")
 		var SubChunk2Size =  data.length
 		var ChunkSize = 36 + SubChunk2Size
-
 		var blob = new Blob([
 			"RIFF",//ChunkID,
 			uint32_bytes(ChunkSize),
 			"WAVE",//ChunkFormat,
 			"fmt ",//SubChunk1ID,
-			uint32_bytes(SubChunk1Size),
-			uint16_bytes(AudioFormat),
+			uint32_bytes(SubChunk1Size),//"\x10\x00\x00\x00",//
+			uint16_bytes(AudioFormat),//"\x01\x00",//
 			uint16_bytes(Channels),
 			uint32_bytes(SampleRate),
 			uint32_bytes(ByteRate),
