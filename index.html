@@ -17,6 +17,7 @@
 <script src="./audio_html5_audio.js"></script>
 <script src="./audio_web_audio_api.js"></script>
 <script src="./spectrogram.js"></script>
+<script src="./visualize_wave.js"></script>
 <style>
 	*{box-sizing: border-box; font-family: Calibri;}
 	body{background-color: black; color: white;}
@@ -95,6 +96,7 @@
 		</div>
     <iframe id="input_sm" src="../js_scoremaker/index.html"></iframe>
     <textarea hidden readonly name="log"></textarea><br>
+    <canvas name="visualizer"></canvas><br>
 		<sub>Inspired by <a href="https://keithwhor.com/music/">https://keithwhor.com/music/</a></sub>
 		<label><input type="checkbox" onclick="document.form.log.hidden = !this.checked"><span>Debug Log</span></label>
 		<label><input type="checkbox"><span>Fine volume control</span></label>
