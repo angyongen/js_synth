@@ -192,6 +192,14 @@ keyContainer.ontouchstart = function(e) {
 		e.preventDefault();
 	}
 }
+keyContainer.ontouchend = function(e) {
+	if(!e.cancelable) {
+			updateTouchedKeys(getTouchedKeys(e.touches))
+			log("touchend" + "kc")
+			e.preventDefault()
+		//} else { log("touchendcancelable" + "kc")
+		}
+}
 function updateTouchedKeys(touchedKeys) {
 	for (var i = lastTouchedKeys.length - 1; i >= 0; i--) {//find released keys
 		var lastTouchedElement = lastTouchedKeys[i]
