@@ -1,7 +1,9 @@
 function log(x) {
 	var element = document.createElement("pre")
 	//element.innerHTML = x;
-	document.form.log.value += (x+ '\n')
+	var value = document.form.log.value
+	value = value.slice(-1000) + (x+ '\n')
+	document.form.log.value = value
 	document.form.log.scrollTop = document.form.log.scrollHeight
 }
 function updateInputTypes() {
